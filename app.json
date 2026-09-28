@@ -64,6 +64,13 @@
     "scheme": "photocatcher",
     "experiments": {
       "typedRoutes": true
+    },
+    "owner": "tmdrudfuf",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "45401302-2bd4-4c18-877d-cf08c3d10229"
+      }
     }
   }
 }
