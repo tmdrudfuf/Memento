@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Photo Catcher",
+    "slug": "photo-catcher",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.photocatcher",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#F4EFE6",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "app.photocatcher"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-image",
+      "expo-video",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Photo Catcher lets you choose photos to keep as memories.",
+          "cameraPermission": "Photo Catcher uses the camera to capture a memory.",
+          "microphonePermission": "Photo Catcher records sound when you film a video for a memory."
+        }
+      ]
+    ],
+    "scheme": "photocatcher",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
