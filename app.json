@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Photo Catcher",
-    "slug": "photo-catcher",
+    "name": "Memento",
+    "slug": "memento",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.tmdrudfuf.photocatcher",
+      "bundleIdentifier": "com.tmdrudfuf.memento",
       "config": {
         "usesNonExemptEncryption": false
       }
@@ -21,7 +21,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.tmdrudfuf.photocatcher",
+      "package": "com.tmdrudfuf.memento",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
@@ -47,9 +47,9 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Photo Catcher lets you choose photos to keep as memories.",
-          "cameraPermission": "Photo Catcher uses the camera to capture a memory.",
-          "microphonePermission": "Photo Catcher records sound when you film a video for a memory."
+          "photosPermission": "Memento lets you choose photos to keep as memories.",
+          "cameraPermission": "Memento uses the camera to capture a memory.",
+          "microphonePermission": "Memento records sound when you film a video for a memory."
         }
       ],
       [
@@ -61,7 +61,7 @@
         }
       ]
     ],
-    "scheme": "photocatcher",
+    "scheme": "memento",
     "experiments": {
       "typedRoutes": true
     },
@@ -69,7 +69,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "45401302-2bd4-4c18-877d-cf08c3d10229"
+        "projectId": "37f19eac-0e83-4e01-8edb-6acbc242e435"
       }
     }
   }

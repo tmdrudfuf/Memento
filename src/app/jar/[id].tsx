@@ -41,7 +41,7 @@ export default function Jar() {
     const n = memories.length;
     Alert.alert(
       `Delete “${jar?.name}”?`,
-      n ? `Its ${n} ${n === 1 ? 'memory' : 'memories'} and their photos and videos will be removed from Photo Catcher. Your Photos library is not affected.` : undefined,
+      n ? `Its ${n} ${n === 1 ? 'memory' : 'memories'} and their photos and videos will be removed from Memento. Your Photos library is not affected.` : undefined,
       [
         { text: 'Cancel', style: 'cancel' },
         {

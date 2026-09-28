@@ -1,4 +1,4 @@
-# Photo Catcher — Architecture & Decisions (Phase 3)
+# Memento — Architecture & Decisions (Phase 3)
 
 Principle: the smallest architecture that can test H1 (see PRODUCT_ASSESSMENT.md).
 
@@ -44,7 +44,7 @@ If step 3 fails, the only result is an orphaned file, never a row pointing at a 
 ## Privacy & data location (§14, §30)
 
 - **What leaves the device:** nothing. There is no network code, no SDKs and no telemetry.
-- **Where data lives:** the app sandbox, as `SQLite/photo-catcher.db` plus `Documents/media/*`.
+- **Where data lives:** the app sandbox, as `SQLite/memento.db` plus `Documents/media/*`.
 - **Backups:** the OS default applies.
   - **iOS:** the Documents directory is included in the user's own iCloud or computer backup.
   - **Android:** Auto Backup to the user's Google account covers app data up to 25 MB and skips it beyond that.
@@ -72,6 +72,6 @@ test/db.test.ts             node:test against node:sqlite
 
 | Item | Add when |
 |---|---|
-| Share-sheet "Add to Photo Catcher" (needs a dev build and a native share extension) | First, if testers report "the photo is in Photos, opening another app is friction" |
+| Share-sheet "Add to Memento" (needs a dev build and a native share extension) | First, if testers report "the photo is in Photos, opening another app is friction" |
 | Export / backup | H1 passes |
 | Change cover, location, map, timeline, sharing, AI | Per masterplan §36 |

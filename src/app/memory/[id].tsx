@@ -94,7 +94,7 @@ export default function Memory() {
   }
 
   function confirmDelete() {
-    Alert.alert('Delete this memory?', 'Its photos, videos and note will be removed from Photo Catcher.', [
+    Alert.alert('Delete this memory?', 'Its photos, videos and note will be removed from Memento.', [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',

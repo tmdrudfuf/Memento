@@ -1,4 +1,4 @@
-# Photo Catcher — UX Flow (Phase 2)
+# Memento — UX Flow (Phase 2)
 
 Guiding test for every element: **does it make Capture → Collect → Remember better?**
 

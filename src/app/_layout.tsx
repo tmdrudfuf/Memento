@@ -7,7 +7,7 @@ import { Button, C } from '../lib/ui';
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName="photo-catcher.db" onInit={migrate}>
+    <SQLiteProvider databaseName="memento.db" onInit={migrate}>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -17,7 +17,7 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: C.paper },
         }}
       >
-        <Stack.Screen name="index" options={{ title: 'Photo Catcher' }} />
+        <Stack.Screen name="index" options={{ title: 'Memento' }} />
         <Stack.Screen name="jar/[id]" options={{ title: '' }} />
         <Stack.Screen name="memory/[id]" options={{ title: '' }} />
         <Stack.Screen name="capture" options={{ presentation: 'modal', title: 'Keep this memory' }} />

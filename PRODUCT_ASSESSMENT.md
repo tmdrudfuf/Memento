@@ -1,10 +1,10 @@
-# Photo Catcher — Product Assessment (Phase 1)
+# Memento — Product Assessment (Phase 1)
 
 Date: 2026-09-27. Scope: masterplan §17–§21, §35.
 
 ## 1. The hard question
 
-> Why use Photo Catcher instead of an album in Apple Photos / Google Photos?
+> Why use Memento instead of an album in Apple Photos / Google Photos?
 
 ### Strongest counterargument (stated honestly)
 
@@ -12,15 +12,15 @@ Date: 2026-09-27. Scope: masterplan §17–§21, §35.
 - **The content side already exists.** Apple Journal has multiple journals, and each entry holds photos, videos, location, audio and "suggested moments". Day One adds encryption, multiple journals and rich metadata.
 - **The jar metaphor is taken.** Journal Jar, Memory Jar (memory-jar.app) and Lumhaa ("Memory Jar & Gratitude") all use it.
 
-**Conclusion: neither "a cover photo on a collection" nor "jars" is a differentiator.** If Photo Catcher only offers these, it fails.
+**Conclusion: neither "a cover photo on a collection" nor "jars" is a differentiator.** If Memento only offers these, it fails.
 
 ### What survives the critique
 
 Three things are *not* offered by any of the above in combination:
 
-1. **The unit is one memory, and it is cheap.** In Photos, the natural unit is the album. Making an album per dinner costs a name, a selection and a key-photo change, so nobody does it. Albums end up per trip, not per moment. A journal entry is text-first, so it asks you to write. Photo Catcher's unit is *one moment*, created in ~3 taps with zero text.
+1. **The unit is one memory, and it is cheap.** In Photos, the natural unit is the album. Making an album per dinner costs a name, a selection and a key-photo change, so nobody does it. Albums end up per trip, not per moment. A journal entry is text-first, so it asks you to write. Memento's unit is *one moment*, created in ~3 taps with zero text.
 
-   | Action | Photo Catcher | Apple Photos album per moment | Apple Journal entry |
+   | Action | Memento | Apple Photos album per moment | Apple Journal entry |
    |---|---|---|---|
    | Start | tap **+** | Albums → **+** → New Album | tap **+** |
    | Required text | none | **album name (required)** | none, but the empty text body is the focus |
@@ -29,11 +29,11 @@ Three things are *not* offered by any of the above in combination:
    | Cover | automatic (the picked photo *is* the cover) | … → Make Key Photo (extra 2–3 taps) | n/a (grid) |
    | **Taps, typical** | **3** | **8–12 + typing** | 4–5 + a text prompt |
 
-2. **A curated space, separate from the camera roll.** Photos shows 20,000 images. Its Albums tab mixes intentional albums with auto-created ones (Screenshots, WhatsApp, Recents). Photo Catcher contains *only things the user deliberately kept*. It is quiet by construction.
+2. **A curated space, separate from the camera roll.** Photos shows 20,000 images. Its Albums tab mixes intentional albums with auto-created ones (Screenshots, WhatsApp, Recents). Memento contains *only things the user deliberately kept*. It is quiet by construction.
 
 3. **Cover-first browsing.** Inside a jar you see covers only: one icon per memory, not every photo. A jar of 30 memories reads as 30 moments. In Photos, 30 albums in a folder look like a filing list, and opening one drops you into a grid.
 
-**Refined positioning:** Photo Catcher is the fastest way to turn a moment into a named-by-picture keepsake, kept apart from the noise of the camera roll.
+**Refined positioning:** Memento is the fastest way to turn a moment into a named-by-picture keepsake, kept apart from the noise of the camera roll.
 
 ## 2. Reasons it could fail (and mitigation)
 
@@ -41,7 +41,7 @@ Three things are *not* offered by any of the above in combination:
 |---|---|---|
 | "I could just make an album" | Structure is replicable | Win on capture cost (3 taps) + curated space; test explicitly (kill signal below) |
 | Users never return (write-only) | Common journaling failure | Home shows covers, so opening the app *is* the rediscovery. Measure revisits. Rediscovery prompts are deferred until usage exists |
-| Capture moment is in the Photos app, not ours | Users shoot with the system camera | MVP: in-app picker (no permission needed). **Top deferred item: share-sheet "Add to Photo Catcher"** (needs native share extension / dev build) |
+| Capture moment is in the Photos app, not ours | Users shoot with the system camera | MVP: in-app picker (no permission needed). **Top deferred item: share-sheet "Add to Memento"** (needs native share extension / dev build) |
 | Duplicated storage | We copy media | Copies are the point (keepsake survives camera-roll cleanup). Covers compressed; show size in docs; revisit if complaints |
 | Cold start: empty app is sad | No content day 1 | Capture creates a jar inline; first memory in < 10 s |
 | Metaphor overload ("jar") | Cute ≠ useful | Keep the word "Jar" but render as a shelf of cover-stacks, not glass illustrations |
@@ -60,7 +60,7 @@ Steps removed because of the scenarios: required title, a separate "confirm" scr
 
 ## 4. Competitors (concrete, not marketing)
 
-| Product | Same interaction? | Gap Photo Catcher targets |
+| Product | Same interaction? | Gap Memento targets |
 |---|---|---|
 | Apple Photos (albums, folders, key photo, Memories) | Structurally yes | Album-per-moment is too costly; Memories covers are auto-picked and **cannot be chosen** by the user |
 | Google Photos (albums, covers, text blocks) | Partly | Same cost problem; lives inside the full library |

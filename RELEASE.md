@@ -1,4 +1,4 @@
-# Photo Catcher — Release & QA
+# Memento — Release & QA
 
 ## QA record (Android emulator, API 35, Expo Go 57.0.9 — 2026-09-27)
 
@@ -29,7 +29,7 @@
 |---|---|
 | Declared permissions (`aapt2 dump permissions`) | ✅ only CAMERA + RECORD_AUDIO are dangerous permissions; no storage/media |
 | Launch, first memory + new jar | ✅ |
-| Camera prompt | ✅ a single system prompt titled "Photo Catcher" (the double prompt was Expo Go-only) |
+| Camera prompt | ✅ a single system prompt titled "Memento" (the double prompt was Expo Go-only) |
 | Force-stop + relaunch | ✅ intact |
 | Reinstall over existing install (Android update path) | ✅ jars, memories, images intact |
 
@@ -53,23 +53,23 @@ Blocked items need the owner (masterplan §26).
 | Step | Command / action | Status |
 |---|---|---|
 | Expo account | logged in as `tmdrudfuf` | ✅ |
-| Link project | `@tmdrudfuf/photo-catcher` (projectId in app.json), Android keystore created on EAS | ✅ |
+| Link project | `@tmdrudfuf/memento` (projectId in app.json). The older `@tmdrudfuf/photo-catcher` project is unused and can be deleted from expo.dev | ✅ |
 | Android cloud build (APK) | `npx eas-cli@latest build -p android --profile preview` | ⏳ free-plan Android builds used up until **2026-10-01**, rerun then (or approve a paid plan) |
 | iOS build | `npx eas-cli@latest build -p ios --profile production`. Needs an Apple Developer account ($99/yr) | **owner decision** |
 | Google Play listing | Play Console ($25 one-time) → internal testing track | **owner decision** |
 | Privacy policy URL | https://tmdrudfuf.github.io/Memento/privacy.html (GitHub Pages from `/docs`; contact = repo Issues) | ✅ |
-| Bundle ID | `com.tmdrudfuf.photocatcher` (iOS + Android). Permanent after the first store upload | ✅ decided |
+| Bundle ID | `com.tmdrudfuf.memento` (iOS + Android). Permanent after the first store upload | ✅ decided |
 
 ## Store listing draft
 
-- **Name:** Photo Catcher (provisional)
+- **Name:** Memento (home-screen name). Store titles must be unique on iOS, so if "Memento" is taken use e.g. "Memento: Memory Jars"
 - **Subtitle:** One photo opens the whole memory
 - **Category:** Lifestyle (alt: Photo & Video)
 - **Short description (Play, 80 chars):** Keep moments, not photos. One symbolic photo opens the whole memory.
 - **Description:**
   > Your camera roll has 20,000 photos. The moments you'd want to relive are buried in there.
   >
-  > Photo Catcher keeps only the ones you choose. Pick one photo that brings a moment back: the ramen you had in Tokyo, a train ticket, the dinner table. That photo becomes the cover of a memory. Inside, keep the related photos, a short video, the date and a line of text.
+  > Memento keeps only the ones you choose. Pick one photo that brings a moment back: the ramen you had in Tokyo, a train ticket, the dinner table. That photo becomes the cover of a memory. Inside, keep the related photos, a short video, the date and a line of text.
   >
   > Memories collect in Jars: "Japan 2026", "Us", "Family", "College". Over time your shelf becomes a collection of your life.
   >
