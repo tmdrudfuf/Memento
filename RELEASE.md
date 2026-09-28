@@ -39,7 +39,7 @@ Build it yourself: `npx expo prebuild -p android` → `cd android` → `./gradle
 
 ## Owner device test
 
-**Android phone (easiest):** install the APK from https://github.com/tmdrudfuf/Memento/releases/tag/v1.0.0-test
+**Android phone (easiest):** install the APK from https://github.com/tmdrudfuf/Memento/releases/tag/v1.0.0
 
 **iPhone (Expo Go):** sign in to Expo Go with the same Expo account as this PC (`tmdrudfuf`). iOS requires this. Then follow these steps:
 
