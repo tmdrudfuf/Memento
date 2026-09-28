@@ -57,8 +57,8 @@ Blocked items need the owner (masterplan §26).
 | Android cloud build (APK) | `npx eas-cli@latest build -p android --profile preview` | ⏳ free-plan Android builds used up until **2026-10-01**, rerun then (or approve a paid plan) |
 | iOS build | `npx eas-cli@latest build -p ios --profile production`. Needs an Apple Developer account ($99/yr) | **owner decision** |
 | Google Play listing | Play Console ($25 one-time) → internal testing track | **owner decision** |
-| Privacy policy URL | host `docs/privacy.html` (e.g. GitHub Pages) and replace `CONTACT_EMAIL` | **owner**: contact email + a public repo or host |
-| Bundle ID | `app.photocatcher` (iOS + Android) is a placeholder. Change it before the first store build, because it is permanent afterwards | **owner decision** |
+| Privacy policy URL | https://tmdrudfuf.github.io/Memento/privacy.html (GitHub Pages from `/docs`; contact = repo Issues) | ✅ |
+| Bundle ID | `com.tmdrudfuf.photocatcher` (iOS + Android). Permanent after the first store upload | ✅ decided |
 
 ## Store listing draft
 
