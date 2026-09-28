@@ -37,7 +37,11 @@ Build it yourself: `npx expo prebuild -p android` → `cd android` → `./gradle
 
 **Not yet verified:** iOS (no Mac, no iPhone here), a real Android phone, the iOS compact date picker, iCloud-only assets (`shouldDownloadFromNetwork`), and survival across an app *update* (needs two store/EAS builds).
 
-## Owner device test (5 minutes, Expo Go)
+## Owner device test
+
+**Android phone (easiest):** install the APK from https://github.com/tmdrudfuf/Memento/releases/tag/v1.0.0-test
+
+**iPhone (Expo Go):** sign in to Expo Go with the same Expo account as this PC (`tmdrudfuf`). iOS requires this. Then follow these steps:
 
 1. Install **Expo Go** from the App Store / Play Store.
 2. On this PC, run `npx expo start --tunnel` in the project folder and scan the QR code.

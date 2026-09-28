@@ -11,6 +11,8 @@ Pick one symbolic photo — a meal, a ticket, a view — and it becomes the cove
 - Technical decisions: [ARCHITECTURE.md](ARCHITECTURE.md)
 - Original brief: [masterplan.md](masterplan.md)
 
+- Website / support: https://tmdrudfuf.github.io/Memento/ · Android test build: [Releases](https://github.com/tmdrudfuf/Memento/releases)
+
 ## Run
 
 ```bash
