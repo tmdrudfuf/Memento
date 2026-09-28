@@ -63,7 +63,7 @@ export default function Memory() {
       value: new Date(m.memoryDate),
       mode: 'date',
       maximumDate: new Date(),
-      onChange: (e, d) => e.type === 'set' && d && save({ memoryDate: d.getTime() }),
+      onValueChange: (_, d) => save({ memoryDate: d.getTime() }),
     });
   }
 
@@ -150,7 +150,7 @@ export default function Memory() {
               mode="date"
               display="compact"
               maximumDate={new Date()}
-              onChange={(e, d) => e.type === 'set' && d && save({ memoryDate: d.getTime() })}
+              onValueChange={(_, d) => save({ memoryDate: d.getTime() })}
               style={{ alignSelf: 'flex-start', marginLeft: -8 }}
             />
           ) : (
