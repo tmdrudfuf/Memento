@@ -1,0 +1,60 @@
+# Signed Android builds on GitHub's runners (free for public repos): replaces EAS cloud builds.
+# Run manually (Actions → Android release → Run workflow) or push a tag like v1.0.1.
+# Needs repo secrets: MEMENTO_UPLOAD_KEYSTORE_B64, MEMENTO_UPLOAD_STORE_PASSWORD, MEMENTO_UPLOAD_KEY_PASSWORD.
+name: Android release
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci --legacy-peer-deps
+      - run: npm run check
+      - run: npx expo prebuild -p android --no-install
+
+      - name: Build signed AAB + APK
+        env:
+          MEMENTO_UPLOAD_KEYSTORE_B64: ${{ secrets.MEMENTO_UPLOAD_KEYSTORE_B64 }}
+          MEMENTO_UPLOAD_STORE_PASSWORD: ${{ secrets.MEMENTO_UPLOAD_STORE_PASSWORD }}
+          MEMENTO_UPLOAD_KEY_PASSWORD: ${{ secrets.MEMENTO_UPLOAD_KEY_PASSWORD }}
+          MEMENTO_UPLOAD_KEY_ALIAS: upload
+          # Play requires versionCode to increase; local builds used 1–2.
+          ANDROID_VERSION_CODE: ${{ github.run_number + 10 }}
+        run: |
+          test -n "$MEMENTO_UPLOAD_KEYSTORE_B64" || { echo "::error::keystore secret missing"; exit 1; }
+          export MEMENTO_UPLOAD_STORE_FILE="$RUNNER_TEMP/upload.jks"
+          echo "$MEMENTO_UPLOAD_KEYSTORE_B64" | base64 -d > "$MEMENTO_UPLOAD_STORE_FILE"
+          cd android && ./gradlew bundleRelease assembleRelease --no-daemon
+          mkdir -p "$RUNNER_TEMP/out"
+          cp app/build/outputs/bundle/release/app-release.aab "$RUNNER_TEMP/out/memento-$ANDROID_VERSION_CODE.aab"
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/out/memento-$ANDROID_VERSION_CODE.apk"
+          rm -f "$MEMENTO_UPLOAD_STORE_FILE"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: memento-android
+          path: ${{ runner.temp }}/out/*
+
+      - name: Attach to GitHub release (tags only)
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/out/* --title "Memento $GITHUB_REF_NAME" --generate-notes
