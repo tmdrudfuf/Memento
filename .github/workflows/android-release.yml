@@ -36,10 +36,10 @@ jobs:
           MEMENTO_UPLOAD_STORE_PASSWORD: ${{ secrets.MEMENTO_UPLOAD_STORE_PASSWORD }}
           MEMENTO_UPLOAD_KEY_PASSWORD: ${{ secrets.MEMENTO_UPLOAD_KEY_PASSWORD }}
           MEMENTO_UPLOAD_KEY_ALIAS: upload
-          # Play requires versionCode to increase; local builds used 1–2.
-          ANDROID_VERSION_CODE: ${{ github.run_number + 10 }}
         run: |
           test -n "$MEMENTO_UPLOAD_KEYSTORE_B64" || { echo "::error::keystore secret missing"; exit 1; }
+          # Play requires versionCode to increase; local builds used 1-2.
+          export ANDROID_VERSION_CODE=$((GITHUB_RUN_NUMBER + 10))
           export MEMENTO_UPLOAD_STORE_FILE="$RUNNER_TEMP/upload.jks"
           echo "$MEMENTO_UPLOAD_KEYSTORE_B64" | base64 -d > "$MEMENTO_UPLOAD_STORE_FILE"
           cd android && ./gradlew bundleRelease assembleRelease --no-daemon

@@ -18,7 +18,7 @@ Principle: the smallest architecture that can test H1 (see PRODUCT_ASSESSMENT.md
 | D10 | Location | **Deferred** | EXIF GPS | Android needs `ACCESS_MEDIA_LOCATION` plus library permission, which breaks D9. |
 | D11 | IDs | SQLite `INTEGER PRIMARY KEY` | UUIDs | No sync exists. Switch to UUIDs if sync or sharing ever lands. |
 | D12 | Tests | `node:test` + the built-in `node:sqlite` running the real SQL from `src/lib/db.ts`, plus `tsc`, `expo lint`, `expo export` (bundle build) and `expo-doctor` | Jest + mocks | Zero added test dependencies, and the real schema and queries are exercised. UI and media are validated on a device (Expo Go). |
-| D13 | Distribution | EAS Build → TestFlight / Play internal testing | Local builds | There is no local native toolchain. The EAS free tier covers MVP build volume. |
+| D13 | Distribution | **Android: GitHub Actions** builds a signed AAB and APK (`.github/workflows/android-release.yml`, upload key in repo secrets, `plugins/withReleaseSigning.js`). **iOS: EAS Build** (cloud build, no Mac needed) | EAS for both | EAS's free Android quota ran out, and GitHub Actions is free and unmetered for public repos. The same upload key can be uploaded to EAS later if we switch back. |
 
 ## Data model
 

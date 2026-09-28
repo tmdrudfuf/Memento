@@ -58,12 +58,18 @@ Blocked items need the owner (masterplan §26).
 |---|---|---|
 | Expo account | logged in as `tmdrudfuf` | ✅ |
 | Link project | `@tmdrudfuf/memento` (projectId in app.json). The older `@tmdrudfuf/photo-catcher` project is unused and can be deleted from expo.dev | ✅ |
-| Android cloud build (APK) | `npx eas-cli@latest build -p android --profile preview` | ⏳ free-plan Android builds used up until **2026-10-01**, rerun then (or approve a paid plan) |
+| Android cloud build (signed AAB + APK) | GitHub → Actions → **Android release** → Run workflow, or push a `v*` tag, which also attaches files to a GitHub release. Signed with the upload key (SHA-256 `A6:68:13:A0:…:F8:83`) | ✅ |
 | iOS build | `npx eas-cli@latest build -p ios --profile production`. Needs an Apple Developer account ($99/yr) | **owner decision** |
 | Google Play listing | Play Console ($25 one-time) → internal testing track | **owner decision** |
 | Support URL | https://tmdrudfuf.github.io/Memento/ | ✅ |
 | Privacy policy URL | https://tmdrudfuf.github.io/Memento/privacy.html (GitHub Pages from `/docs`; contact = repo Issues) | ✅ |
 | Bundle ID | `com.tmdrudfuf.memento` (iOS + Android). Permanent after the first store upload | ✅ decided |
+
+## Upload key (Android)
+
+- Upload key: `%USERPROFILE%\.memento-keys\upload.jks` plus `upload.properties` (passwords). It is also in GitHub Secrets. **Back up this folder somewhere safe** (e.g. a password manager).
+- The Play Console uses *Play App Signing*: Google holds the real app-signing key, and this is only the upload key. If it is lost, Google can reset it, but that takes days.
+- Local signed build: set `MEMENTO_UPLOAD_STORE_FILE` and the passwords from `upload.properties`, then `npx expo prebuild -p android` → `cd android && ./gradlew bundleRelease`.
 
 ## Store listing draft
 
