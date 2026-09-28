@@ -23,6 +23,18 @@
 | Large images (3000×4000 JPEG) | ✅ re-encoded at q0.8, ~95 KB for test images |
 | Multiple jars & memories, stack shows latest covers | ✅ |
 
+### Standalone release APK (local build, emulator, 2026-09-27)
+
+| Case | Result |
+|---|---|
+| Declared permissions (`aapt2 dump permissions`) | ✅ only CAMERA + RECORD_AUDIO are dangerous permissions; no storage/media |
+| Launch, first memory + new jar | ✅ |
+| Camera prompt | ✅ a single system prompt titled "Photo Catcher" (the double prompt was Expo Go-only) |
+| Force-stop + relaunch | ✅ intact |
+| Reinstall over existing install (Android update path) | ✅ jars, memories, images intact |
+
+Build it yourself: `npx expo prebuild -p android` → `cd android` → `./gradlew assembleRelease`. The local APK is signed with the **debug** key, so it is for sideloading and testing only. Store builds use the EAS-managed keystore (already created on Expo's servers).
+
 **Not yet verified:** iOS (no Mac, no iPhone here), a real Android phone, the iOS compact date picker, iCloud-only assets (`shouldDownloadFromNetwork`), and survival across an app *update* (needs two store/EAS builds).
 
 ## Owner device test (5 minutes, Expo Go)
@@ -40,9 +52,9 @@ Blocked items need the owner (masterplan §26).
 
 | Step | Command / action | Status |
 |---|---|---|
-| Expo account (free) | `npx eas-cli@latest login` | **owner** |
-| Link project | `npx eas-cli@latest init` (writes `extra.eas.projectId` into app.json) | after login |
-| Android test build (APK, free tier) | `npx eas-cli@latest build -p android --profile preview` | after login |
+| Expo account | logged in as `tmdrudfuf` | ✅ |
+| Link project | `@tmdrudfuf/photo-catcher` (projectId in app.json), Android keystore created on EAS | ✅ |
+| Android cloud build (APK) | `npx eas-cli@latest build -p android --profile preview` | ⏳ free-plan Android builds used up until **2026-10-01**, rerun then (or approve a paid plan) |
 | iOS build | `npx eas-cli@latest build -p ios --profile production`. Needs an Apple Developer account ($99/yr) | **owner decision** |
 | Google Play listing | Play Console ($25 one-time) → internal testing track | **owner decision** |
 | Privacy policy URL | host `docs/privacy.html` (e.g. GitHub Pages) and replace `CONTACT_EMAIL` | **owner**: contact email + a public repo or host |
