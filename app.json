@@ -39,6 +39,14 @@
           "cameraPermission": "Photo Catcher uses the camera to capture a memory.",
           "microphonePermission": "Photo Catcher records sound when you film a video for a memory."
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "backgroundColor": "#F4EFE6"
+        }
       ]
     ],
     "scheme": "photocatcher",
