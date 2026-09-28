@@ -79,13 +79,24 @@ export function CoverStack({ covers, size = 120 }: { covers: string[]; size?: nu
     );
   }
   const layers = covers.slice(0, 3).reverse();
-  const angles = ['-8deg', '6deg', '-1deg'].slice(3 - layers.length);
+  const fan = [
+    { rotate: '-9deg', translateX: -12, translateY: 2 },
+    { rotate: '7deg', translateX: 12, translateY: -2 },
+    { rotate: '-1deg', translateX: 0, translateY: 0 },
+  ].slice(3 - layers.length);
   return (
-    <View style={{ width: size + 16, height: size + 16, alignItems: 'center', justifyContent: 'center' }}>
+    <View style={{ width: size + 40, height: size + 20, alignItems: 'center', justifyContent: 'center' }}>
       {layers.map((f, i) => (
         <View
           key={f + i}
-          style={[styles.stackCard, { width: size, height: size, transform: [{ rotate: angles[i] }] }]}
+          style={[
+            styles.stackCard,
+            {
+              width: size,
+              height: size,
+              transform: [{ translateX: fan[i].translateX }, { translateY: fan[i].translateY }, { rotate: fan[i].rotate }],
+            },
+          ]}
         >
           <Photo file={f} style={{ flex: 1 }} />
         </View>

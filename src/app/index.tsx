@@ -49,14 +49,14 @@ export default function Home() {
               {item.name}
             </Text>
             <Text style={styles.count}>
-              {item.count} {item.count === 1 ? 'memory' : 'memories'}
+              {plural(item.count, 'memory', 'memories')}
             </Text>
           </Pressable>
         )}
         ListFooterComponent={
           s.memories > 0 ? (
             <Text style={styles.stats}>
-              {s.memories} memories · {s.jars} jars · {s.revisited} revisited after a week
+              {plural(s.memories, 'memory', 'memories')} · {plural(s.jars, 'jar', 'jars')} · {s.revisited} revisited after a week
             </Text>
           ) : null
         }
@@ -66,6 +66,8 @@ export default function Home() {
     </SafeAreaView>
   );
 }
+
+const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 const styles = StyleSheet.create({
   jar: { flex: 1, maxWidth: '50%', alignItems: 'center', paddingVertical: 16 },

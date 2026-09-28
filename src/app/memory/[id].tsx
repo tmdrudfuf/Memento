@@ -139,6 +139,8 @@ export default function Memory() {
             placeholderTextColor={C.muted}
             style={styles.title}
             maxLength={80}
+            multiline
+            submitBehavior="blurAndSubmit"
             returnKeyType="done"
           />
 
