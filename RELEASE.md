@@ -57,6 +57,7 @@ Blocked items need the owner (masterplan §26).
 | Android cloud build (APK) | `npx eas-cli@latest build -p android --profile preview` | ⏳ free-plan Android builds used up until **2026-10-01**, rerun then (or approve a paid plan) |
 | iOS build | `npx eas-cli@latest build -p ios --profile production`. Needs an Apple Developer account ($99/yr) | **owner decision** |
 | Google Play listing | Play Console ($25 one-time) → internal testing track | **owner decision** |
+| Support URL | https://tmdrudfuf.github.io/Memento/ | ✅ |
 | Privacy policy URL | https://tmdrudfuf.github.io/Memento/privacy.html (GitHub Pages from `/docs`; contact = repo Issues) | ✅ |
 | Bundle ID | `com.tmdrudfuf.memento` (iOS + Android). Permanent after the first store upload | ✅ decided |
 
