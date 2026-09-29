@@ -1,17 +1,21 @@
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { createJar, deleteJar, getSetting, listJars, renameJar, type JarSummary } from '../lib/db';
+import { t } from '../lib/i18n';
 import { removeFiles, saveFailed, startCapture } from '../lib/media';
 import { NameDialog, Sheet } from '../lib/sheet';
-import { C, CaptureBar, CoverStack, Empty } from '../lib/ui';
+import { makeStyles, useChrome } from '../lib/theme';
+import { CaptureBar, CoverStack, Empty } from '../lib/ui';
 
 const NEW = -1; // sentinel item for the "New jar" tile
 
 export default function Home() {
   const db = useSQLiteContext();
+  const chrome = useChrome();
+  const styles = useStyles();
   const [jars, setJars] = useState<JarSummary[] | null>(null);
   const [menuFor, setMenuFor] = useState<JarSummary | null>(null);
   const [dialog, setDialog] = useState<{ mode: 'new' } | { mode: 'rename'; jar: JarSummary } | null>(null);
@@ -41,24 +45,17 @@ export default function Home() {
   }
 
   function confirmDelete(jar: JarSummary) {
-    const n = jar.count;
-    Alert.alert(
-      `Delete “${jar.name}”?`,
-      n
-        ? `Its ${n} ${n === 1 ? 'memory' : 'memories'} and their photos and videos will be removed from Memento. Your Photos library is not affected.`
-        : undefined,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            removeFiles(await deleteJar(db, jar.id));
-            load();
-          },
+    Alert.alert(t.deleteJarTitle(jar.name), jar.count ? t.deleteJarBody(jar.count) : undefined, [
+      { text: t.cancel, style: 'cancel' },
+      {
+        text: t.delete,
+        style: 'destructive',
+        onPress: async () => {
+          removeFiles(await deleteJar(db, jar.id));
+          load();
         },
-      ],
-    );
+      },
+    ]);
   }
 
   if (!jars) return null;
@@ -68,12 +65,13 @@ export default function Home() {
     <SafeAreaView style={{ flex: 1 }} edges={['bottom']}>
       <Stack.Screen
         options={{
+          ...chrome,
           headerRight: () => (
             <Pressable
               onPress={() => router.push('/settings')}
               hitSlop={12}
               accessibilityRole="button"
-              accessibilityLabel="Settings"
+              accessibilityLabel={t.settings}
             >
               <Text style={styles.gear}>⚙</Text>
             </Pressable>
@@ -87,11 +85,8 @@ export default function Home() {
         contentContainerStyle={{ padding: 12, flexGrow: 1 }}
         columnWrapperStyle={{ gap: 12 }}
         ListEmptyComponent={
-          <Empty title="Your shelf is empty">
-            <Text style={styles.hint}>
-              Pick one photo that brings a moment back — a meal, a ticket, a view.{'\n'}That photo opens the whole
-              memory.
-            </Text>
+          <Empty title={t.shelfEmptyTitle}>
+            <Text style={styles.hint}>{t.shelfEmptyHint}</Text>
           </Empty>
         }
         renderItem={({ item }) =>
@@ -100,12 +95,12 @@ export default function Home() {
               style={styles.jar}
               onPress={() => setDialog({ mode: 'new' })}
               accessibilityRole="button"
-              accessibilityLabel="New jar"
+              accessibilityLabel={t.newJar}
             >
               <View style={styles.newTile}>
                 <Text style={styles.newPlus}>＋</Text>
               </View>
-              <Text style={[styles.jarName, { color: C.muted }]}>New jar</Text>
+              <Text style={[styles.jarName, styles.muted]}>{t.newJar}</Text>
             </Pressable>
           ) : (
             <Pressable
@@ -113,13 +108,13 @@ export default function Home() {
               onPress={() => open(item.id)}
               onLongPress={() => setMenuFor(item)}
               accessibilityRole="button"
-              accessibilityLabel={`${item.name}, ${plural(item.count, 'memory', 'memories')}. Long press for options`}
+              accessibilityLabel={t.jarA11y(item.name, item.count)}
             >
               <CoverStack covers={item.covers} />
               <Text style={styles.jarName} numberOfLines={1}>
                 {item.name}
               </Text>
-              <Text style={styles.count}>{plural(item.count, 'memory', 'memories')}</Text>
+              <Text style={styles.count}>{t.memories(item.count)}</Text>
             </Pressable>
           )
         }
@@ -134,19 +129,19 @@ export default function Home() {
         actions={
           menuFor
             ? [
-                { label: 'Open', onPress: () => open(menuFor.id) },
-                { label: 'Rename', onPress: () => setDialog({ mode: 'rename', jar: menuFor }) },
-                { label: 'Delete jar', destructive: true, onPress: () => confirmDelete(menuFor) },
+                { label: t.open, onPress: () => open(menuFor.id) },
+                { label: t.rename, onPress: () => setDialog({ mode: 'rename', jar: menuFor }) },
+                { label: t.deleteJar, destructive: true, onPress: () => confirmDelete(menuFor) },
               ]
             : []
         }
       />
       <NameDialog
         visible={!!dialog}
-        title={dialog?.mode === 'rename' ? 'Rename jar' : 'New jar'}
+        title={dialog?.mode === 'rename' ? t.renameJar : t.newJar}
         initial={dialog?.mode === 'rename' ? dialog.jar.name : ''}
-        placeholder="e.g. Japan 2026, Us, Cooking"
-        confirmLabel={dialog?.mode === 'rename' ? 'Save' : 'Create'}
+        placeholder={t.jarPlaceholder}
+        confirmLabel={dialog?.mode === 'rename' ? t.save : t.create}
         onSubmit={submitName}
         onClose={() => setDialog(null)}
       />
@@ -154,25 +149,24 @@ export default function Home() {
   );
 }
 
-const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
-
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   jar: { flex: 1, maxWidth: '50%', alignItems: 'center', paddingVertical: 16 },
-  jarName: { fontSize: 16, fontWeight: '600', color: C.ink, marginTop: 10 },
-  count: { fontSize: 13, color: C.muted, marginTop: 2 },
-  hint: { color: C.muted, textAlign: 'center', lineHeight: 20 },
-  shelfLine: { height: 1, backgroundColor: C.line },
-  gear: { fontSize: 24, color: C.ink },
+  jarName: { fontSize: 16, fontWeight: '600', color: c.ink, marginTop: 10 },
+  muted: { color: c.muted },
+  count: { fontSize: 13, color: c.muted, marginTop: 2 },
+  hint: { color: c.muted, textAlign: 'center', lineHeight: 20 },
+  shelfLine: { height: 1, backgroundColor: c.line },
+  gear: { fontSize: 24, color: c.ink },
   newTile: {
     width: 120,
     height: 120,
     marginVertical: 10,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: C.line,
+    borderColor: c.line,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  newPlus: { fontSize: 36, color: C.muted },
-});
+  newPlus: { fontSize: 36, color: c.muted },
+}));

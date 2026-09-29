@@ -5,12 +5,15 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.tmdrudfuf.memento",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
@@ -72,6 +75,9 @@
       "eas": {
         "projectId": "37f19eac-0e83-4e01-8edb-6acbc242e435"
       }
+    },
+    "locales": {
+      "ko": "./locales/ko.json"
     }
   }
 }

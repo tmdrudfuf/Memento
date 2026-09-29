@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { C } from './ui';
+import { t } from './i18n';
+import { makeStyles, useColors } from './theme';
 
 export type SheetAction = { label: string; onPress: () => void; destructive?: boolean };
 
@@ -18,26 +19,28 @@ export function Sheet({
   onClose: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const styles = useStyles();
+  const c = useColors();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close menu" />
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel={t.closeMenu} />
       <View style={[styles.sheet, { paddingBottom: 12 + insets.bottom }]}>
         {title ? <Text style={styles.title}>{title}</Text> : null}
         {actions.map((a) => (
           <Pressable
             key={a.label}
-            style={({ pressed }) => [styles.row, pressed && { backgroundColor: C.paper }]}
+            style={({ pressed }) => [styles.row, pressed && { backgroundColor: c.paper }]}
             onPress={() => {
               onClose();
               a.onPress();
             }}
             accessibilityRole="button"
           >
-            <Text style={[styles.rowText, a.destructive && { color: C.accent }]}>{a.label}</Text>
+            <Text style={[styles.rowText, a.destructive && { color: c.accent }]}>{a.label}</Text>
           </Pressable>
         ))}
         <Pressable style={styles.row} onPress={onClose} accessibilityRole="button">
-          <Text style={[styles.rowText, { color: C.muted }]}>Cancel</Text>
+          <Text style={[styles.rowText, { color: c.muted }]}>{t.cancel}</Text>
         </Pressable>
       </View>
     </Modal>
@@ -64,7 +67,9 @@ export function NameDialog(props: NameDialogProps) {
   );
 }
 
-function DialogBody({ title, initial = '', placeholder, confirmLabel = 'Save', onSubmit, onClose }: NameDialogProps) {
+function DialogBody({ title, initial = '', placeholder, confirmLabel = t.save, onSubmit, onClose }: NameDialogProps) {
+  const styles = useStyles();
+  const c = useColors();
   const [name, setName] = useState(initial);
   const ok = name.trim().length > 0;
   const submit = () => {
@@ -82,7 +87,7 @@ function DialogBody({ title, initial = '', placeholder, confirmLabel = 'Save', o
           value={name}
           onChangeText={setName}
           placeholder={placeholder}
-          placeholderTextColor={C.muted}
+          placeholderTextColor={c.muted}
           onSubmitEditing={submit}
           returnKeyType="done"
           maxLength={40}
@@ -90,7 +95,7 @@ function DialogBody({ title, initial = '', placeholder, confirmLabel = 'Save', o
         />
         <View style={styles.buttons}>
           <Pressable onPress={onClose} hitSlop={8} accessibilityRole="button">
-            <Text style={[styles.btn, { color: C.muted }]}>Cancel</Text>
+            <Text style={[styles.btn, { color: c.muted }]}>{t.cancel}</Text>
           </Pressable>
           <Pressable onPress={submit} hitSlop={8} accessibilityRole="button" disabled={!ok}>
             <Text style={[styles.btn, !ok && { opacity: 0.4 }]}>{confirmLabel}</Text>
@@ -101,23 +106,23 @@ function DialogBody({ title, initial = '', placeholder, confirmLabel = 'Save', o
   );
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.35)' },
-  sheet: { backgroundColor: C.card, borderTopLeftRadius: 18, borderTopRightRadius: 18, paddingTop: 8 },
-  title: { color: C.muted, fontSize: 13, textAlign: 'center', paddingVertical: 10 },
+const useStyles = makeStyles((c) => ({
+  backdrop: { flex: 1, backgroundColor: c.scrim },
+  sheet: { backgroundColor: c.card, borderTopLeftRadius: 18, borderTopRightRadius: 18, paddingTop: 8 },
+  title: { color: c.muted, fontSize: 13, textAlign: 'center', paddingVertical: 10 },
   row: { paddingVertical: 16, paddingHorizontal: 24 },
-  rowText: { fontSize: 17, color: C.ink, textAlign: 'center' },
-  center: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: 'rgba(0,0,0,0.35)' },
-  dialog: { backgroundColor: C.card, borderRadius: 16, padding: 20, gap: 16 },
-  dialogTitle: { fontSize: 18, fontWeight: '600', color: C.ink },
+  rowText: { fontSize: 17, color: c.ink, textAlign: 'center' },
+  center: { flex: 1, justifyContent: 'center', padding: 24, backgroundColor: c.scrim },
+  dialog: { backgroundColor: c.card, borderRadius: 16, padding: 20, gap: 16 },
+  dialogTitle: { fontSize: 18, fontWeight: '600', color: c.ink },
   input: {
     fontSize: 16,
-    backgroundColor: C.paper,
+    backgroundColor: c.paper,
     borderRadius: 10,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: C.ink,
+    color: c.ink,
   },
   buttons: { flexDirection: 'row', justifyContent: 'flex-end', gap: 28 },
-  btn: { fontSize: 16, fontWeight: '600', color: C.accent },
-});
+  btn: { fontSize: 16, fontWeight: '600', color: c.accent },
+}));

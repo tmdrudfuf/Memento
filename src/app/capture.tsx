@@ -1,14 +1,20 @@
-import { router, useLocalSearchParams, useNavigation } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useRef, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { createJar, createMemory, listJars, type JarSummary } from '../lib/db';
+import { t } from '../lib/i18n';
 import { removeFiles, saveFailed } from '../lib/media';
-import { C, Photo } from '../lib/ui';
+import { makeStyles, useChrome } from '../lib/theme';
+import { Photo, useColors } from '../lib/ui';
 
 // Photo → choose Jar → Done. Tapping a jar IS the save; nothing else is asked.
 export default function Capture() {
   const db = useSQLiteContext();
+  const chrome = useChrome();
+  const styles = useStyles();
+  const c = useColors();
   const p = useLocalSearchParams<{ file: string; date: string; jarId: string }>();
   const [jars, setJars] = useState<JarSummary[] | null>(null);
   const [naming, setNaming] = useState(false);
@@ -39,6 +45,7 @@ export default function Capture() {
     saved.current = true;
     try {
       const id = await createMemory(db, { jarId, cover: p.file, memoryDate: Number(p.date) || null });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
       router.dismissTo({ pathname: '/jar/[id]', params: { id: String(jarId), settle: String(id) } });
     } catch (e) {
       saved.current = false;
@@ -59,11 +66,12 @@ export default function Capture() {
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <Stack.Screen options={chrome} />
       <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
         <View style={styles.frame}>
           <Photo file={p.file} style={{ aspectRatio: 1, width: '100%' }} />
         </View>
-        <Text style={styles.label}>{jars.length ? 'Tap a jar to keep it' : 'Name your first jar'}</Text>
+        <Text style={styles.label}>{jars.length ? t.tapJar : t.nameFirstJar}</Text>
         <View style={styles.chips}>
           {jars.map((j, i) => (
             <Pressable
@@ -71,14 +79,14 @@ export default function Capture() {
               onPress={() => save(j.id)}
               style={({ pressed }) => [styles.chip, i === 0 && styles.chipFirst, pressed && { opacity: 0.6 }]}
               accessibilityRole="button"
-              accessibilityLabel={`Save to ${j.name}`}
+              accessibilityLabel={t.saveTo(j.name)}
             >
-              <Text style={[styles.chipText, i === 0 && { color: '#fff' }]}>{j.name}</Text>
+              <Text style={[styles.chipText, i === 0 && styles.chipFirstText]}>{j.name}</Text>
             </Pressable>
           ))}
           {!naming && (
             <Pressable onPress={() => setNaming(true)} style={[styles.chip, styles.chipNew]} accessibilityRole="button">
-              <Text style={styles.chipText}>＋ New jar</Text>
+              <Text style={styles.chipText}>{t.newJarChip}</Text>
             </Pressable>
           )}
         </View>
@@ -88,8 +96,8 @@ export default function Capture() {
               autoFocus
               value={name}
               onChangeText={setName}
-              placeholder="e.g. Japan 2026, Us, Cooking"
-              placeholderTextColor={C.muted}
+              placeholder={t.jarPlaceholder}
+              placeholderTextColor={c.muted}
               returnKeyType="done"
               onSubmitEditing={saveToNewJar}
               style={styles.input}
@@ -100,7 +108,7 @@ export default function Capture() {
               style={[styles.chip, styles.chipFirst, !name.trim() && { opacity: 0.4 }]}
               accessibilityRole="button"
             >
-              <Text style={[styles.chipText, { color: '#fff' }]}>Keep</Text>
+              <Text style={[styles.chipText, styles.chipFirstText]}>{t.keep}</Text>
             </Pressable>
           </View>
         )}
@@ -109,10 +117,10 @@ export default function Capture() {
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles((c) => ({
   wrap: { padding: 20, gap: 16 },
   frame: {
-    backgroundColor: C.card,
+    backgroundColor: c.frame,
     padding: 10,
     paddingBottom: 28,
     alignSelf: 'center',
@@ -124,29 +132,30 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 4,
   },
-  label: { color: C.muted, fontSize: 14, marginTop: 8 },
+  label: { color: c.muted, fontSize: 14, marginTop: 8 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   chip: {
     paddingVertical: 12,
     paddingHorizontal: 18,
     borderRadius: 22,
-    backgroundColor: C.card,
+    backgroundColor: c.card,
     borderWidth: 1,
-    borderColor: C.line,
+    borderColor: c.line,
   },
-  chipFirst: { backgroundColor: C.ink, borderColor: C.ink },
+  chipFirst: { backgroundColor: c.ink, borderColor: c.ink },
+  chipFirstText: { color: c.onInk },
   chipNew: { borderStyle: 'dashed' },
-  chipText: { fontSize: 16, color: C.ink, fontWeight: '500' },
+  chipText: { fontSize: 16, color: c.ink, fontWeight: '500' },
   newRow: { flexDirection: 'row', gap: 10, alignItems: 'center' },
   input: {
     flex: 1,
     fontSize: 16,
-    backgroundColor: C.card,
+    backgroundColor: c.card,
     borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 12,
-    color: C.ink,
+    color: c.ink,
     borderWidth: 1,
-    borderColor: C.line,
+    borderColor: c.line,
   },
-});
+}));

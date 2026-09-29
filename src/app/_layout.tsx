@@ -1,45 +1,49 @@
-import { Stack, type ErrorBoundaryProps } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider, type ErrorBoundaryProps } from 'expo-router';
 import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
+import { Text, useColorScheme, View } from 'react-native';
 import { migrate } from '../lib/db';
-import { Button, C } from '../lib/ui';
+import { t } from '../lib/i18n';
+import { Button, useColors } from '../lib/ui';
 
 export default function RootLayout() {
+  const c = useColors();
+  const scheme = useColorScheme();
+  const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+  const theme = {
+    ...base,
+    colors: { ...base.colors, background: c.paper, card: c.paper, text: c.ink, border: c.line, primary: c.accent },
+  };
   return (
     <SQLiteProvider databaseName="memento.db" onInit={migrate}>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: C.paper },
-          headerShadowVisible: false,
-          headerTintColor: C.ink,
-          contentStyle: { backgroundColor: C.paper },
-        }}
-      >
-        <Stack.Screen name="index" options={{ title: 'Memento' }} />
-        <Stack.Screen name="jar/[id]" options={{ title: '' }} />
-        <Stack.Screen name="memory/[id]" options={{ title: '' }} />
-        <Stack.Screen name="capture" options={{ presentation: 'modal', title: 'Keep this memory' }} />
-        <Stack.Screen name="settings" options={{ title: 'Settings' }} />
-        <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false }} />
-        <Stack.Screen
-          name="viewer"
-          options={{ presentation: 'fullScreenModal', headerShown: false, contentStyle: { backgroundColor: '#000' } }}
-        />
-      </Stack>
+      <ThemeProvider value={theme}>
+        <StatusBar style="auto" />
+        <Stack screenOptions={{ headerShadowVisible: false }}>
+          <Stack.Screen name="index" options={{ title: 'Memento' }} />
+          <Stack.Screen name="jar/[id]" options={{ title: '' }} />
+          <Stack.Screen name="memory/[id]" options={{ title: '' }} />
+          <Stack.Screen name="capture" options={{ presentation: 'modal', title: t.captureTitle }} />
+          <Stack.Screen name="settings" options={{ title: t.settings }} />
+          <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false }} />
+          <Stack.Screen
+            name="viewer"
+            options={{ presentation: 'fullScreenModal', headerShown: false, contentStyle: { backgroundColor: '#000' } }}
+          />
+        </Stack>
+      </ThemeProvider>
     </SQLiteProvider>
   );
 }
 
 // Any render error lands here instead of a blank crash. Memories are on disk; retry is safe.
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  const c = useColors();
   console.error(error);
   return (
-    <View style={{ flex: 1, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
-      <Text style={{ fontSize: 18, fontWeight: '600', color: C.ink }}>Something went wrong</Text>
-      <Text style={{ color: C.muted, textAlign: 'center' }}>Your memories are safe on this device.</Text>
-      <Button label="Try again" onPress={retry} />
+    <View style={{ flex: 1, backgroundColor: c.paper, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
+      <Text style={{ fontSize: 18, fontWeight: '600', color: c.ink }}>{t.errorTitle}</Text>
+      <Text style={{ color: c.muted, textAlign: 'center' }}>{t.errorBody}</Text>
+      <Button label={t.tryAgain} onPress={retry} />
     </View>
   );
 }

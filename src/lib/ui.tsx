@@ -1,16 +1,11 @@
 import { Image } from 'expo-image';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
+import { Animated, Pressable, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
+import { t } from './i18n';
 import { mediaUri } from './media';
+import { makeStyles, useColors } from './theme';
 
-export const C = {
-  paper: '#F4EFE6',
-  card: '#FFFFFF',
-  ink: '#2B2622',
-  muted: '#8A8078',
-  accent: '#C8553D',
-  line: '#E3DBCD',
-};
+export { useColors } from './theme';
 
 export const formatDate = (ms: number) =>
   new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
@@ -19,6 +14,7 @@ export const formatDate = (ms: number) =>
 export const tilt = (id: number, max = 2.5) => `${(((id * 37) % 11) / 10 - 0.5) * 2 * max}deg`;
 
 export function Photo({ file, style }: { file: string; style?: ImageStyle }) {
+  const styles = useStyles();
   return (
     <Image
       source={{ uri: mediaUri(file) }}
@@ -44,6 +40,7 @@ export function Polaroid({
   onPress?: () => void;
   settle?: boolean;
 }) {
+  const styles = useStyles();
   // "Settle": the new memory drops into the jar. Runs after the save is persisted.
   const [drop] = useState(() => new Animated.Value(settle ? 0 : 1));
   useEffect(() => {
@@ -59,7 +56,7 @@ export function Polaroid({
   };
   return (
     <Animated.View style={[styles.polaroid, anim]}>
-      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={`Open memory ${caption}`}>
+      <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={t.openMemory(caption)}>
         <Photo file={file} style={{ aspectRatio: 1 }} />
         <Text style={styles.caption} numberOfLines={1}>
           {caption}
@@ -71,13 +68,15 @@ export function Polaroid({
 
 // A jar on the shelf: its latest covers fanned like a stack of prints.
 export function CoverStack({ covers, size = 120 }: { covers: string[]; size?: number }) {
+  const styles = useStyles();
+  const c = useColors();
   if (!covers.length) {
     // A blank print: clearly a jar, clearly different from the dashed "New jar" tile.
     return (
       <View style={{ width: size + 40, height: size + 20, alignItems: 'center', justifyContent: 'center' }}>
         <View style={[styles.stackCard, { position: 'relative', width: size, height: size }]}>
           <View style={styles.blank}>
-            <Text style={{ color: C.muted, fontSize: 13 }}>No memories yet</Text>
+            <Text style={{ color: c.muted, fontSize: 13 }}>{t.noMemoriesYet}</Text>
           </View>
         </View>
       </View>
@@ -121,6 +120,7 @@ export function Button({
   kind?: 'primary' | 'ghost';
   style?: ViewStyle;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       onPress={onPress}
@@ -132,21 +132,23 @@ export function Button({
         style,
       ]}
     >
-      <Text style={[styles.btnText, kind === 'ghost' && { color: C.ink }]}>{label}</Text>
+      <Text style={[styles.btnText, kind === 'ghost' && styles.btnGhostText]}>{label}</Text>
     </Pressable>
   );
 }
 
 export function CaptureBar({ onLibrary, onCamera }: { onLibrary: () => void; onCamera: () => void }) {
+  const styles = useStyles();
   return (
     <View style={styles.bar}>
-      <Button label="＋  Add a memory" onPress={onLibrary} style={{ flex: 1 }} />
-      <Button label="Camera" kind="ghost" onPress={onCamera} />
+      <Button label={t.addMemory} onPress={onLibrary} style={{ flex: 1 }} />
+      <Button label={t.camera} kind="ghost" onPress={onCamera} />
     </View>
   );
 }
 
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
+  const styles = useStyles();
   return (
     <View style={styles.empty}>
       <Text style={styles.emptyTitle}>{title}</Text>
@@ -155,10 +157,10 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
   );
 }
 
-const styles = StyleSheet.create({
-  photo: { backgroundColor: C.line },
+const useStyles = makeStyles((c) => ({
+  photo: { backgroundColor: c.line },
   polaroid: {
-    backgroundColor: C.card,
+    backgroundColor: c.frame,
     padding: 8,
     paddingBottom: 4,
     borderRadius: 3,
@@ -168,10 +170,10 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 3,
   },
-  caption: { color: C.ink, fontSize: 13, paddingVertical: 8, textAlign: 'center' },
+  caption: { color: c.frameInk, fontSize: 13, paddingVertical: 8, textAlign: 'center' },
   stackCard: {
     position: 'absolute',
-    backgroundColor: C.card,
+    backgroundColor: c.frame,
     padding: 5,
     borderRadius: 3,
     shadowColor: '#000',
@@ -180,12 +182,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  blank: { flex: 1, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
+  blank: { flex: 1, backgroundColor: c.paper, alignItems: 'center', justifyContent: 'center' },
   btn: { paddingVertical: 14, paddingHorizontal: 18, borderRadius: 14, alignItems: 'center' },
-  btnPrimary: { backgroundColor: C.ink },
-  btnGhost: { backgroundColor: C.card, borderWidth: 1, borderColor: C.line },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  btnPrimary: { backgroundColor: c.ink },
+  btnGhost: { backgroundColor: c.card, borderWidth: 1, borderColor: c.line },
+  btnText: { color: c.onInk, fontSize: 16, fontWeight: '600' },
+  btnGhostText: { color: c.ink },
   bar: { flexDirection: 'row', gap: 10, padding: 16, paddingBottom: 8 },
   empty: { alignItems: 'center', padding: 32, gap: 8 },
-  emptyTitle: { fontSize: 18, color: C.ink, fontWeight: '600', textAlign: 'center' },
-});
+  emptyTitle: { fontSize: 18, color: c.ink, fontWeight: '600', textAlign: 'center' },
+}));

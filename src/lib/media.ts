@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as Sharing from 'expo-sharing';
 import { Alert, Linking } from 'react-native';
 import { parseExifDate, type MediaKind } from './db';
+import { t } from './i18n';
 
 // Media lives in Documents/media; the DB stores only file names, because the
 // iOS container path can change across app updates.
@@ -53,11 +54,10 @@ export async function pickFromLibrary({ multiple = false, videos = false } = {})
 export async function takeWithCamera({ videos = false } = {}) {
   const perm = await ImagePicker.requestCameraPermissionsAsync();
   if (!perm.granted) {
-    Alert.alert(
-      'Camera access is off',
-      'You can still choose a photo from your library, or allow camera access in Settings.',
-      [{ text: 'OK' }, { text: 'Open Settings', onPress: () => Linking.openSettings() }],
-    );
+    Alert.alert(t.cameraOffTitle, t.cameraOffBody, [
+      { text: t.ok },
+      { text: t.openSettings, onPress: () => Linking.openSettings() },
+    ]);
     return [];
   }
   const r = await ImagePicker.launchCameraAsync(options(false, videos));
@@ -77,7 +77,7 @@ export function removeFiles(names: string[]) {
 
 export function saveFailed(e: unknown) {
   console.warn(e);
-  Alert.alert("Couldn't save this", 'Please try again. If the photo is only in iCloud, check your connection.');
+  Alert.alert(t.saveFailedTitle, t.saveFailedBody);
 }
 
 /** + / Camera → copy the symbolic photo → Capture sheet (choose a jar = saved). */
@@ -100,7 +100,7 @@ export async function shareFile(name: string) {
     await Sharing.shareAsync(mediaUri(name));
   } catch (e) {
     console.warn(e);
-    Alert.alert("Couldn't share this", 'Please try again.');
+    Alert.alert(t.shareFailedTitle, t.tryAgainBody);
   }
 }
 

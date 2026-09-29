@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { t } from '../lib/i18n';
 import { mediaUri, shareFile } from '../lib/media';
 
 function Video({ uri }: { uri: string }) {
@@ -21,10 +22,10 @@ export default function Viewer() {
         <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="contain" />
       )}
       <SafeAreaView edges={['top']} style={styles.top} pointerEvents="box-none">
-        <Pressable onPress={() => shareFile(file)} hitSlop={16} accessibilityRole="button" accessibilityLabel="Share">
-          <Text style={styles.share}>Share</Text>
+        <Pressable onPress={() => shareFile(file)} hitSlop={16} accessibilityRole="button" accessibilityLabel={t.share}>
+          <Text style={styles.share}>{t.share}</Text>
         </Pressable>
-        <Pressable onPress={() => router.back()} hitSlop={16} accessibilityRole="button" accessibilityLabel="Close">
+        <Pressable onPress={() => router.back()} hitSlop={16} accessibilityRole="button" accessibilityLabel={t.close}>
           <Text style={styles.close}>✕</Text>
         </Pressable>
       </SafeAreaView>
