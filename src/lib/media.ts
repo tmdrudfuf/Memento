@@ -1,6 +1,7 @@
 import { Directory, File, Paths } from 'expo-file-system';
 import { router } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 import { Alert, Linking } from 'react-native';
 import { parseExifDate, type MediaKind } from './db';
 
@@ -91,4 +92,27 @@ export async function startCapture(camera: boolean, jarId?: number) {
   } catch (e) {
     saveFailed(e);
   }
+}
+
+/** Opens the system share menu for one of our media files. */
+export async function shareFile(name: string) {
+  try {
+    await Sharing.shareAsync(mediaUri(name));
+  } catch (e) {
+    console.warn(e);
+    Alert.alert("Couldn't share this", 'Please try again.');
+  }
+}
+
+/** Bytes used by all copied photos and videos. */
+export function storageUsed() {
+  const d = dir();
+  if (!d.exists) return 0;
+  return d.list().reduce((sum, f) => sum + (f instanceof File ? (f.size ?? 0) : 0), 0);
+}
+
+/** Removes every media file (used by "Delete all data"). */
+export function removeAllMedia() {
+  const d = dir();
+  if (d.exists) d.delete();
 }

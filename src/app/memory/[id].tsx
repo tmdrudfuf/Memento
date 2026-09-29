@@ -18,13 +18,18 @@ import {
   deleteMedia,
   deleteMemory,
   getMemory,
+  listJars,
   listMedia,
   markOpened,
+  moveMemory,
+  setCover,
   updateMemory,
+  type JarSummary,
   type Media,
   type Memory as MemoryRow,
 } from '../../lib/db';
-import { pickFromLibrary, removeFiles, saveFailed, takeWithCamera } from '../../lib/media';
+import { pickFromLibrary, removeFiles, saveFailed, shareFile, takeWithCamera } from '../../lib/media';
+import { Sheet } from '../../lib/sheet';
 import { C, formatDate, Photo } from '../../lib/ui';
 
 export default function Memory() {
@@ -34,6 +39,9 @@ export default function Memory() {
   const [media, setMedia] = useState<Media[]>([]);
   const [title, setTitle] = useState('');
   const [note, setNote] = useState('');
+  const [menu, setMenu] = useState(false);
+  const [itemMenu, setItemMenu] = useState<Media | null>(null);
+  const [moveTo, setMoveTo] = useState<JarSummary[] | null>(null);
 
   const load = useCallback(async () => {
     const row = await getMemory(db, id);
@@ -93,6 +101,30 @@ export default function Memory() {
     ]);
   }
 
+  async function chooseJar() {
+    const jars = await listJars(db);
+    const others = jars.filter((j) => j.id !== m?.jarId);
+    if (!others.length) {
+      Alert.alert('No other jars yet', 'Create another jar on the Home screen first.');
+      return;
+    }
+    setMoveTo(others);
+  }
+
+  async function move(jar: JarSummary) {
+    await moveMemory(db, id, jar.id);
+    router.dismissTo({ pathname: '/jar/[id]', params: { id: String(jar.id) } });
+  }
+
+  async function makeCover(item: Media) {
+    try {
+      await setCover(db, id, item.id);
+      load();
+    } catch (e) {
+      saveFailed(e);
+    }
+  }
+
   function confirmDelete() {
     Alert.alert('Delete this memory?', 'Its photos, videos and note will be removed from Memento.', [
       { text: 'Cancel', style: 'cancel' },
@@ -117,8 +149,8 @@ export default function Memory() {
         options={{
           title: '',
           headerRight: () => (
-            <Pressable onPress={confirmDelete} hitSlop={12} accessibilityRole="button">
-              <Text style={{ color: C.accent, fontSize: 16 }}>Delete</Text>
+            <Pressable onPress={() => setMenu(true)} hitSlop={12} accessibilityRole="button" accessibilityLabel="Memory options">
+              <Text style={{ color: C.ink, fontSize: 22, fontWeight: '700' }}>•••</Text>
             </Pressable>
           ),
         }}
@@ -179,8 +211,8 @@ export default function Memory() {
                 key={it.id}
                 style={styles.tile}
                 onPress={() => view(it.file, it.kind)}
-                onLongPress={() => removeItem(it)}
-                accessibilityLabel={`${it.kind}, long press to remove`}
+                onLongPress={() => setItemMenu(it)}
+                accessibilityLabel={`${it.kind}, long press for options`}
               >
                 {it.kind === 'photo' ? (
                   <Photo file={it.file} style={{ flex: 1 }} />
@@ -198,9 +230,38 @@ export default function Memory() {
               <Text style={styles.addText}>Camera</Text>
             </Pressable>
           </View>
-          {media.length > 0 && <Text style={styles.hint}>Long-press an item to remove it.</Text>}
+          {media.length > 0 && <Text style={styles.hint}>Long-press a photo to make it the cover, share or remove it.</Text>}
         </View>
       </ScrollView>
+
+      <Sheet
+        visible={menu}
+        onClose={() => setMenu(false)}
+        actions={[
+          { label: 'Move to another jar', onPress: chooseJar },
+          { label: 'Share cover photo', onPress: () => shareFile(m.cover) },
+          { label: 'Delete memory', destructive: true, onPress: confirmDelete },
+        ]}
+      />
+      <Sheet
+        visible={!!moveTo}
+        title="Move to…"
+        onClose={() => setMoveTo(null)}
+        actions={(moveTo ?? []).map((j) => ({ label: j.name, onPress: () => move(j) }))}
+      />
+      <Sheet
+        visible={!!itemMenu}
+        onClose={() => setItemMenu(null)}
+        actions={
+          itemMenu
+            ? [
+                ...(itemMenu.kind === 'photo' ? [{ label: 'Make it the cover', onPress: () => makeCover(itemMenu) }] : []),
+                { label: `Share ${itemMenu.kind}`, onPress: () => shareFile(itemMenu.file) },
+                { label: `Remove ${itemMenu.kind}`, destructive: true, onPress: () => removeItem(itemMenu) },
+              ]
+            : []
+        }
+      />
     </KeyboardAvoidingView>
   );
 }

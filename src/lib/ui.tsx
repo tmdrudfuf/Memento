@@ -72,9 +72,14 @@ export function Polaroid({
 // A jar on the shelf: its latest covers fanned like a stack of prints.
 export function CoverStack({ covers, size = 120 }: { covers: string[]; size?: number }) {
   if (!covers.length) {
+    // A blank print: clearly a jar, clearly different from the dashed "New jar" tile.
     return (
-      <View style={[styles.emptyStack, { width: size, height: size }]}>
-        <Text style={{ color: C.muted }}>empty</Text>
+      <View style={{ width: size + 40, height: size + 20, alignItems: 'center', justifyContent: 'center' }}>
+        <View style={[styles.stackCard, { position: 'relative', width: size, height: size }]}>
+          <View style={styles.blank}>
+            <Text style={{ color: C.muted, fontSize: 13 }}>No memories yet</Text>
+          </View>
+        </View>
       </View>
     );
   }
@@ -175,15 +180,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  emptyStack: {
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: C.line,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8,
-  },
+  blank: { flex: 1, backgroundColor: C.paper, alignItems: 'center', justifyContent: 'center' },
   btn: { paddingVertical: 14, paddingHorizontal: 18, borderRadius: 14, alignItems: 'center' },
   btnPrimary: { backgroundColor: C.ink },
   btnGhost: { backgroundColor: C.card, borderWidth: 1, borderColor: C.line },

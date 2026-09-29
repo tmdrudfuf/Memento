@@ -20,7 +20,7 @@ export type Memory = {
 export type MediaKind = 'photo' | 'video';
 export type Media = { id: number; memoryId: number; file: string; kind: MediaKind; createdAt: number };
 
-const VERSION = 1;
+const VERSION = 2;
 
 export async function migrate(db: DB) {
   await db.execAsync('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
@@ -58,6 +58,11 @@ export async function migrate(db: DB) {
       CREATE INDEX media_memory ON media(memoryId);
     `);
     v = 1;
+  }
+  if (v === 1) {
+    // Small key/value store for app state (first-run flag, preferences).
+    await db.execAsync('CREATE TABLE settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);');
+    v = 2;
   }
   await db.execAsync(`PRAGMA user_version = ${VERSION}`);
 }
@@ -199,4 +204,38 @@ export function parseExifDate(s: unknown): number | null {
   const [y, mo, d, h, mi, se] = m.slice(1).map(Number);
   const t = new Date(y, mo - 1, d, h, mi, se).getTime();
   return Number.isNaN(t) || y < 1900 ? null : t;
+}
+
+export async function moveMemory(db: DB, id: number, jarId: number, now = Date.now()) {
+  await db.runAsync('UPDATE memories SET jarId = ?, updatedAt = ? WHERE id = ?', [jarId, now, id]);
+  await db.runAsync('UPDATE jars SET updatedAt = ? WHERE id = ?', [now, jarId]);
+}
+
+// Swap: the related photo becomes the cover, the old cover becomes a related photo. No file changes.
+export async function setCover(db: DB, memoryId: number, mediaId: number, now = Date.now()) {
+  const m = await db.getFirstAsync<{ cover: string }>('SELECT cover FROM memories WHERE id = ?', [memoryId]);
+  const item = await db.getFirstAsync<{ file: string; kind: MediaKind }>(
+    'SELECT file, kind FROM media WHERE id = ? AND memoryId = ?',
+    [mediaId, memoryId],
+  );
+  if (!m || !item || item.kind !== 'photo') throw new Error('Only a photo in this memory can become its cover');
+  await db.runAsync('UPDATE memories SET cover = ?, updatedAt = ? WHERE id = ?', [item.file, now, memoryId]);
+  await db.runAsync('UPDATE media SET file = ? WHERE id = ?', [m.cover, mediaId]);
+}
+
+// Wipes every jar, memory and media row. Caller deletes the media folder.
+export async function deleteAllData(db: DB) {
+  await db.runAsync('DELETE FROM jars');
+}
+
+export async function getSetting(db: DB, key: string) {
+  const r = await db.getFirstAsync<{ value: string }>('SELECT value FROM settings WHERE key = ?', [key]);
+  return r?.value ?? null;
+}
+
+export async function setSetting(db: DB, key: string, value: string) {
+  await db.runAsync(
+    'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+    [key, value],
+  );
 }

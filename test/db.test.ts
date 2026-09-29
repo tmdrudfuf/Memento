@@ -144,3 +144,65 @@ test('parseExifDate', () => {
   assert.equal(q.parseExifDate('garbage'), null);
   assert.equal(q.parseExifDate(undefined), null);
 });
+
+test('move memory to another jar bumps the target jar to the front', async () => {
+  const db = await fresh();
+  const a = await q.createJar(db, 'A', 1);
+  const b = await q.createJar(db, 'B', 2);
+  const id = await q.createMemory(db, { jarId: b, cover: 'c.jpg' }, 3);
+  await q.moveMemory(db, id, a, 10);
+  assert.equal((await q.getMemory(db, id))?.jarId, a);
+  assert.equal((await q.listMemories(db, b)).length, 0);
+  assert.equal((await q.listJars(db))[0].id, a);
+});
+
+test('set cover swaps cover and related photo; videos cannot be covers', async () => {
+  const db = await fresh();
+  const jar = await q.createJar(db, 'J');
+  const id = await q.createMemory(db, { jarId: jar, cover: 'old.jpg' });
+  await q.addMedia(db, id, [
+    { file: 'new.jpg', kind: 'photo' },
+    { file: 'v.mp4', kind: 'video' },
+  ]);
+  const [photo, video] = await q.listMedia(db, id);
+  await q.setCover(db, id, photo.id);
+  assert.equal((await q.getMemory(db, id))?.cover, 'new.jpg');
+  assert.deepEqual((await q.listMedia(db, id)).map((m) => m.file), ['old.jpg', 'v.mp4']);
+  await assert.rejects(q.setCover(db, id, video.id));
+  const other = await q.createMemory(db, { jarId: jar, cover: 'x.jpg' });
+  await assert.rejects(q.setCover(db, other, photo.id), 'media from another memory');
+});
+
+test('delete all data empties everything but keeps settings', async () => {
+  const db = await fresh();
+  const jar = await q.createJar(db, 'J');
+  const id = await q.createMemory(db, { jarId: jar, cover: 'c' });
+  await q.addMedia(db, id, [{ file: 'p', kind: 'photo' }]);
+  await q.setSetting(db, 'welcomed', '1');
+  await q.deleteAllData(db);
+  assert.deepEqual({ ...(await q.stats(db)) }, { memories: 0, jars: 0, revisited: 0 });
+  assert.equal((await q.listMedia(db, id)).length, 0);
+  assert.equal(await q.getSetting(db, 'welcomed'), '1');
+});
+
+test('settings upsert', async () => {
+  const db = await fresh();
+  assert.equal(await q.getSetting(db, 'k'), null);
+  await q.setSetting(db, 'k', 'a');
+  await q.setSetting(db, 'k', 'b');
+  assert.equal(await q.getSetting(db, 'k'), 'b');
+});
+
+test('v1 database migrates to v2 keeping data', async () => {
+  const db = open();
+  await db.execAsync(`
+    CREATE TABLE jars (id INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL);
+    CREATE TABLE memories (id INTEGER PRIMARY KEY NOT NULL, jarId INTEGER NOT NULL REFERENCES jars(id) ON DELETE CASCADE, cover TEXT NOT NULL, title TEXT, note TEXT, memoryDate INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, openCount INTEGER NOT NULL DEFAULT 0, lastOpenedAt INTEGER);
+    CREATE TABLE media (id INTEGER PRIMARY KEY NOT NULL, memoryId INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE, file TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('photo', 'video')), createdAt INTEGER NOT NULL);
+    INSERT INTO jars VALUES (1, 'Old', 1, 1);
+    PRAGMA user_version = 1;`);
+  await q.migrate(db);
+  assert.equal((await q.listJars(db))[0].name, 'Old');
+  await q.setSetting(db, 'x', 'y');
+  assert.equal(await q.getSetting(db, 'x'), 'y');
+});

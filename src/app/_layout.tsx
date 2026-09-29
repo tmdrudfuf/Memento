@@ -21,6 +21,8 @@ export default function RootLayout() {
         <Stack.Screen name="jar/[id]" options={{ title: '' }} />
         <Stack.Screen name="memory/[id]" options={{ title: '' }} />
         <Stack.Screen name="capture" options={{ presentation: 'modal', title: 'Keep this memory' }} />
+        <Stack.Screen name="settings" options={{ title: 'Settings' }} />
+        <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false }} />
         <Stack.Screen
           name="viewer"
           options={{ presentation: 'fullScreenModal', headerShown: false, contentStyle: { backgroundColor: '#000' } }}

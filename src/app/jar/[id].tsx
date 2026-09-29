@@ -1,11 +1,12 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { deleteJar, getJar, listMemories, renameJar, type Jar as JarRow, type Memory } from '../../lib/db';
 import { removeFiles, startCapture } from '../../lib/media';
-import { Button, C, CaptureBar, Empty, formatDate, Polaroid } from '../../lib/ui';
+import { NameDialog, Sheet } from '../../lib/sheet';
+import { C, CaptureBar, Empty, formatDate, Polaroid } from '../../lib/ui';
 
 export default function Jar() {
   const db = useSQLiteContext();
@@ -13,14 +14,13 @@ export default function Jar() {
   const id = Number(idParam);
   const [jar, setJar] = useState<JarRow | null>(null);
   const [memories, setMemories] = useState<Memory[]>([]);
-  const [editing, setEditing] = useState(false);
-  const [name, setName] = useState('');
+  const [menu, setMenu] = useState(false);
+  const [renaming, setRenaming] = useState(false);
 
   const load = useCallback(async () => {
     const j = await getJar(db, id);
     if (!j) return router.back();
     setJar(j);
-    setName(j.name);
     setMemories(await listMemories(db, id));
   }, [db, id]);
 
@@ -30,10 +30,8 @@ export default function Jar() {
     }, [load]),
   );
 
-  async function saveName() {
-    if (!name.trim()) return;
+  async function saveName(name: string) {
     await renameJar(db, id, name);
-    setEditing(false);
     load();
   }
 
@@ -64,26 +62,12 @@ export default function Jar() {
         options={{
           title: jar.name,
           headerRight: () => (
-            <Pressable onPress={() => setEditing((e) => !e)} hitSlop={12} accessibilityRole="button">
-              <Text style={{ color: C.accent, fontSize: 16 }}>{editing ? 'Done' : 'Edit'}</Text>
+            <Pressable onPress={() => setMenu(true)} hitSlop={12} accessibilityRole="button" accessibilityLabel="Jar options">
+              <Text style={{ color: C.ink, fontSize: 22, fontWeight: '700' }}>•••</Text>
             </Pressable>
           ),
         }}
       />
-      {editing && (
-        <View style={styles.edit}>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            onSubmitEditing={saveName}
-            onBlur={saveName}
-            style={styles.input}
-            maxLength={40}
-            accessibilityLabel="Jar name"
-          />
-          <Button label="Delete jar" kind="ghost" onPress={confirmDelete} />
-        </View>
-      )}
       <FlatList
         data={memories}
         numColumns={2}
@@ -108,21 +92,23 @@ export default function Jar() {
         )}
       />
       <CaptureBar onLibrary={() => startCapture(false, id)} onCamera={() => startCapture(true, id)} />
+      <Sheet
+        visible={menu}
+        title={jar.name}
+        onClose={() => setMenu(false)}
+        actions={[
+          { label: 'Rename', onPress: () => setRenaming(true) },
+          { label: 'Delete jar', destructive: true, onPress: confirmDelete },
+        ]}
+      />
+      <NameDialog
+        visible={renaming}
+        title="Rename jar"
+        initial={jar.name}
+        onSubmit={saveName}
+        onClose={() => setRenaming(false)}
+      />
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  edit: { flexDirection: 'row', gap: 10, paddingHorizontal: 16, alignItems: 'center' },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    backgroundColor: C.card,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: C.ink,
-    borderWidth: 1,
-    borderColor: C.line,
-  },
-});
