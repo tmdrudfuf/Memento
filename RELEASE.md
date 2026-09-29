@@ -23,6 +23,16 @@
 | Large images (3000×4000 JPEG) | ✅ re-encoded at q0.8, ~95 KB for test images |
 | Multiple jars & memories, stack shows latest covers | ✅ |
 
+### Backup QA (Expo Go, emulator, 2026-09-28)
+
+| Case | Result |
+|---|---|
+| Export: zip streamed to cache, share sheet offers Drive/Gmail/etc. | ✅ |
+| Zip is standard (Python `zipfile`: CRC OK; memento.json + media/) | ✅ |
+| Delete all data → Restore from backup → jars, memories, titles, dates, photos back | ✅ |
+| Restore the same file again → nothing duplicated | ✅ |
+| Untrusted zip: `../` and nested paths never extracted (unit test) | ✅ |
+
 ### Monetization QA (QA release APK, emulator, 2026-09-28)
 
 | Case | Result |

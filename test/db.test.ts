@@ -212,3 +212,41 @@ test('v1 database migrates to v2 keeping data', async () => {
   await q.setSetting(db, 'x', 'y');
   assert.equal(await q.getSetting(db, 'x'), 'y');
 });
+
+test('backup round-trip into an empty device restores everything', async () => {
+  const src = await fresh();
+  const a = await q.createJar(src, 'Japan', 1);
+  const m = await q.createMemory(src, { jarId: a, cover: 'r.jpg', memoryDate: 5 }, 2);
+  await q.updateMemory(src, m, { title: 'Ramen Night', note: 'no English menu' });
+  await q.addMedia(src, m, [{ file: 'v.mp4', kind: 'video' }]);
+  const backup = await q.dumpAll(src, 99);
+  assert.ok(q.isBackup(JSON.parse(JSON.stringify(backup))));
+
+  const dst = await fresh();
+  assert.deepEqual(await q.restoreRows(dst, backup), { jars: 1, memories: 1 });
+  const [jar] = await q.listJars(dst);
+  assert.equal(jar.name, 'Japan');
+  const [mem] = await q.listMemories(dst, jar.id);
+  assert.equal(mem.title, 'Ramen Night');
+  assert.equal(mem.note, 'no English menu');
+  assert.deepEqual((await q.listMedia(dst, mem.id)).map((x) => x.file), ['v.mp4']);
+});
+
+test('restoring twice does not duplicate; same-name jar is merged', async () => {
+  const src = await fresh();
+  const a = await q.createJar(src, 'Us');
+  await q.createMemory(src, { jarId: a, cover: 'x.jpg' });
+  const backup = await q.dumpAll(src);
+  const dst = await fresh();
+  const existing = await q.createJar(dst, 'Us');
+  await q.createMemory(dst, { jarId: existing, cover: 'mine.jpg' });
+  assert.deepEqual(await q.restoreRows(dst, backup), { jars: 0, memories: 1 });
+  assert.deepEqual(await q.restoreRows(dst, backup), { jars: 0, memories: 0 });
+  assert.equal((await q.listJars(dst)).length, 1);
+  assert.equal((await q.listMemories(dst, existing)).length, 2);
+});
+
+test('isBackup rejects other files', () => {
+  assert.equal(q.isBackup({ format: 'zip' }), false);
+  assert.equal(q.isBackup(null), false);
+});

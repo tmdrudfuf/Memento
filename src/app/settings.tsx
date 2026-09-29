@@ -2,8 +2,20 @@ import Constants from 'expo-constants';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState, type ReactNode } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useAds } from '../lib/ads';
+import { exportBackup, importBackup, NotABackupError } from '../lib/backup';
 import { config } from '../lib/config';
 import { deleteAllData, getSetting, setSetting, stats } from '../lib/db';
 import { removeAllMedia, storageUsed } from '../lib/media';
@@ -29,6 +41,41 @@ export default function Settings() {
   const [reminder, setReminder] = useState(false);
   const c = useColors();
   const premium = usePremium();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  async function doExport() {
+    setBusy(t.preparingBackup(0, 0));
+    try {
+      await exportBackup(db, (done, total) => setBusy(t.preparingBackup(done, total)));
+    } catch (e) {
+      console.warn(e);
+      Alert.alert(t.backupFailed, t.tryAgainBody);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  function doImport() {
+    Alert.alert(t.restoreTitle, t.restoreBody, [
+      { text: t.cancel, style: 'cancel' },
+      {
+        text: t.continue,
+        onPress: async () => {
+          setBusy(t.restoring);
+          try {
+            const r = await importBackup(db);
+            if (r) Alert.alert(r.memories || r.jars ? t.restoreDone(r.jars, r.memories) : t.restoreNothing);
+            load();
+          } catch (e) {
+            console.warn(e);
+            Alert.alert(e instanceof NotABackupError ? t.notABackup : t.backupFailed);
+          } finally {
+            setBusy(null);
+          }
+        },
+      },
+    ]);
+  }
   const ads = useAds();
 
   const load = useCallback(() => {
@@ -83,6 +130,14 @@ export default function Settings() {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <Stack.Screen options={chrome} />
+      <Modal visible={!!busy} transparent animationType="fade">
+        <View style={styles.busy}>
+          <View style={styles.busyCard}>
+            <ActivityIndicator color={c.ink} />
+            <Text style={styles.label}>{busy}</Text>
+          </View>
+        </View>
+      </Modal>
       <Section title={t.premium}>
         <Row label={premium.isPremium ? t.planPremium : t.planFree} value={premium.isPremium ? '✓' : undefined} />
         {!premium.isPremium && (
@@ -119,6 +174,12 @@ export default function Settings() {
         <Row label={t.revisited} value={String(s.revisited)} />
         <Row label={t.storageUsed} value={formatBytes(bytes)} />
         <Row label={t.yearlyRecap} onPress={() => router.push('/recap')} last />
+      </Section>
+
+      <Section title={t.backup}>
+        <Text style={styles.note}>{t.backupNote}</Text>
+        <Row label={t.exportBackup} onPress={doExport} />
+        <Row label={t.restoreBackup} onPress={doImport} last />
       </Section>
 
       <Section title={t.reminders}>
@@ -202,5 +263,7 @@ const useStyles = makeStyles((c) => ({
   value: { fontSize: 16, color: c.muted },
   chevron: { fontSize: 22, color: c.muted, lineHeight: 22 },
   sub: { color: c.muted, fontSize: 13, lineHeight: 18 },
+  busy: { flex: 1, backgroundColor: c.scrim, alignItems: 'center', justifyContent: 'center' },
+  busyCard: { backgroundColor: c.card, borderRadius: 16, padding: 24, gap: 12, alignItems: 'center', minWidth: 220 },
   note: { color: c.muted, fontSize: 14, lineHeight: 20, padding: 16, paddingBottom: 4 },
 }));

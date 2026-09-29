@@ -169,6 +169,21 @@ const en = {
       ? 'You kept a memory around this day in past years.'
       : `You kept ${n} memories around this day in past years.`,
   seeWithPremium: 'See them with Premium',
+  // Backup
+  backup: 'Backup',
+  backupNote: 'Save everything as one file and keep it somewhere safe, like Google Drive. Restore it on a new phone.',
+  exportBackup: 'Export backup',
+  restoreBackup: 'Restore from backup',
+  preparingBackup: (done: number, total: number) =>
+    total ? `Preparing backup… ${done}/${total}` : 'Preparing backup…',
+  restoring: 'Restoring…',
+  restoreTitle: 'Restore from a backup?',
+  restoreBody: 'Jars and memories from the backup are added to this phone. Nothing here is deleted.',
+  restoreDone: (jars: number, memories: number) =>
+    `Restored ${memories === 1 ? '1 memory' : `${memories} memories`}${jars ? ` and ${jars === 1 ? '1 new jar' : `${jars} new jars`}` : ''}.`,
+  restoreNothing: 'Everything in this backup is already on this phone.',
+  notABackup: 'This file isn’t a Memento backup.',
+  backupFailed: 'Backup didn’t finish',
 };
 
 type Dict = typeof en;
@@ -326,6 +341,18 @@ const ko: Dict = {
   devPremium: 'Premium (디버그 빌드 전용)',
   onThisDayLocked: (n) => `지난 몇 해 이맘때 담은 추억이 ${n}개 있어요.`,
   seeWithPremium: 'Premium으로 보기',
+  backup: '백업',
+  backupNote: '모든 추억을 파일 하나로 저장해 Google Drive처럼 안전한 곳에 보관하세요. 새 휴대폰에서 복원할 수 있어요.',
+  exportBackup: '백업 파일 만들기',
+  restoreBackup: '백업에서 복원',
+  preparingBackup: (done, total) => (total ? `백업 준비 중… ${done}/${total}` : '백업 준비 중…'),
+  restoring: '복원 중…',
+  restoreTitle: '백업에서 복원할까요?',
+  restoreBody: '백업의 추억 병과 추억이 이 휴대폰에 추가돼요. 지금 있는 추억은 삭제되지 않아요.',
+  restoreDone: (jars, memories) => `추억 ${memories}개${jars ? `와 새 추억 병 ${jars}개` : ''}를 복원했어요.`,
+  restoreNothing: '이 백업의 추억은 이미 모두 이 휴대폰에 있어요.',
+  notABackup: 'Memento 백업 파일이 아니에요.',
+  backupFailed: '백업을 완료하지 못했어요',
 };
 
 // ponytail: language fixed at launch; switching phone language applies on next app start.

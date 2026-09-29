@@ -248,3 +248,80 @@ export function allMemoriesLite(db: DB) {
     lastOpenedAt: number | null;
   }>('SELECT id, jarId, cover, title, memoryDate, createdAt, lastOpenedAt FROM memories');
 }
+
+// ---- Backup / restore (rows only; files are handled by backup.ts) ----
+
+export type BackupData = {
+  format: 'memento-backup';
+  version: 1;
+  exportedAt: number;
+  jars: Jar[];
+  memories: Memory[];
+  media: Media[];
+};
+
+export async function dumpAll(db: DB, now = Date.now()): Promise<BackupData> {
+  return {
+    format: 'memento-backup',
+    version: 1,
+    exportedAt: now,
+    jars: await db.getAllAsync<Jar>('SELECT * FROM jars ORDER BY id'),
+    memories: await db.getAllAsync<Memory>('SELECT * FROM memories ORDER BY id'),
+    media: await db.getAllAsync<Media>('SELECT * FROM media ORDER BY id'),
+  };
+}
+
+export function isBackup(x: unknown): x is BackupData {
+  const b = x as BackupData;
+  return !!b && b.format === 'memento-backup' && b.version === 1 && [b.jars, b.memories, b.media].every(Array.isArray);
+}
+
+/**
+ * Adds a backup's jars and memories to this device. Safe to run twice: a memory whose cover file
+ * already exists here is skipped (file names are unique per capture), and so are its media.
+ * Jars are matched by name so restoring into an existing collection doesn't duplicate them.
+ */
+export async function restoreRows(db: DB, b: BackupData) {
+  const jarIds = new Map<number, number>();
+  const existingJars = await db.getAllAsync<Jar>('SELECT * FROM jars');
+  let jars = 0;
+  for (const j of b.jars) {
+    const same = existingJars.find((e) => e.name === j.name);
+    if (same) jarIds.set(j.id, same.id);
+    else {
+      const r = await db.runAsync('INSERT INTO jars (name, createdAt, updatedAt) VALUES (?, ?, ?)', [
+        j.name,
+        j.createdAt,
+        j.updatedAt,
+      ]);
+      jarIds.set(j.id, r.lastInsertRowId);
+      jars++;
+    }
+  }
+  const memoryIds = new Map<number, number>();
+  let memories = 0;
+  for (const m of b.memories) {
+    const jarId = jarIds.get(m.jarId);
+    if (jarId === undefined) continue;
+    const dup = await db.getFirstAsync<{ id: number }>('SELECT id FROM memories WHERE cover = ?', [m.cover]);
+    if (dup) continue;
+    const r = await db.runAsync(
+      `INSERT INTO memories (jarId, cover, title, note, memoryDate, createdAt, updatedAt, openCount, lastOpenedAt)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [jarId, m.cover, m.title, m.note, m.memoryDate, m.createdAt, m.updatedAt, m.openCount, m.lastOpenedAt],
+    );
+    memoryIds.set(m.id, r.lastInsertRowId);
+    memories++;
+  }
+  for (const x of b.media) {
+    const memoryId = memoryIds.get(x.memoryId);
+    if (memoryId === undefined) continue;
+    await db.runAsync('INSERT INTO media (memoryId, file, kind, createdAt) VALUES (?, ?, ?, ?)', [
+      memoryId,
+      x.file,
+      x.kind,
+      x.createdAt,
+    ]);
+  }
+  return { jars, memories };
+}
