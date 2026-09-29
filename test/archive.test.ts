@@ -2,7 +2,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Zip, ZipPassThrough, strToU8 } from 'fflate';
-import { CHUNK, readArchive, safeMediaName, writeArchive, type Sink } from '../src/lib/archive.ts';
+import { CHUNK, readArchive, safeMediaName, splitParts, writeArchive, type Sink } from '../src/lib/archive.ts';
 
 const source = (name: string, data: Uint8Array) => {
   let off = 0;
@@ -84,4 +84,15 @@ test('safeMediaName', () => {
   assert.ok(safeMediaName('1790581518179-yb7kk3.jpeg'));
   for (const bad of ['../x', '.hidden', 'a/b.jpg', 'a\\b.jpg', '', 'x..y'])
     assert.equal(safeMediaName(bad), false, bad);
+});
+
+test('splitParts keeps every archive under the limit, in order, never empty', () => {
+  const f = (size: number, id: number) => ({ size, id });
+  const parts = splitParts([f(4, 1), f(4, 2), f(3, 3), f(9, 4), f(1, 5)], 10);
+  assert.deepEqual(
+    parts.map((p) => p.map((x) => x.id)),
+    [[1, 2], [3], [4, 5]],
+  );
+  assert.deepEqual(splitParts([], 10), [[]]); // json-only backup still gets one part
+  assert.deepEqual(splitParts([f(20, 1)], 10), [[f(20, 1)]]); // oversize file alone in its part
 });

@@ -1,7 +1,7 @@
 import { router, Stack, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { allMemoriesLite, listJars } from '../lib/db';
 import { t } from '../lib/i18n';
 import { usePremium } from '../lib/premium';
@@ -49,9 +49,18 @@ export default function Recap() {
   const shown = year ?? years[0] ?? new Date().getFullYear();
   const r: RecapData = recap(rows, shown);
 
-  return (
-    <ScrollView contentContainerStyle={styles.wrap}>
-      <Stack.Screen options={{ ...chrome, title: t.yearlyRecap }} />
+  // Virtualized: month labels and rows of 3 prints, so a busy year only draws what's on screen.
+  type Row = { key: string; month?: number; prints?: MemoryLite[] };
+  const list: Row[] = [];
+  r.months.forEach((n, m) => {
+    if (!n) return;
+    list.push({ key: `m${m}`, month: m });
+    const items = r.memories.filter((x) => new Date(x.memoryDate).getMonth() === m);
+    for (let i = 0; i < items.length; i += 3) list.push({ key: `p${m}-${i}`, prints: items.slice(i, i + 3) });
+  });
+
+  const header = (
+    <View style={{ gap: 10 }}>
       {years.length > 1 && (
         <View style={styles.years}>
           {years.map((y) => (
@@ -66,8 +75,9 @@ export default function Recap() {
           ))}
         </View>
       )}
-
-      <Text style={styles.title}>{t.recapTitle(shown)}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {t.recapTitle(shown)}
+      </Text>
       {r.count === 0 ? (
         <Empty title={t.recapEmpty} />
       ) : (
@@ -77,33 +87,44 @@ export default function Recap() {
           {r.topJarId !== null && r.jarCount > 1 && (
             <Text style={styles.line}>{t.topJar(jarNames.get(r.topJarId) ?? '')}</Text>
           )}
-
-          {r.months.map((n, m) =>
-            n === 0 ? null : (
-              <View key={m} style={styles.month}>
-                <Text style={styles.monthLabel}>{monthName(m)}</Text>
-                <View style={styles.grid}>
-                  {r.memories
-                    .filter((x) => new Date(x.memoryDate).getMonth() === m)
-                    .map((x) => (
-                      <Pressable
-                        key={x.id}
-                        style={[styles.print, { transform: [{ rotate: tilt(x.id, 3) }] }]}
-                        onPress={() => router.push({ pathname: '/memory/[id]', params: { id: String(x.id) } })}
-                        accessibilityRole="button"
-                        accessibilityLabel={t.openMemory(x.title ?? monthName(m))}
-                      >
-                        <Photo file={x.cover} style={{ width: '100%', aspectRatio: 1 }} />
-                        <Pin id={x.id} size={11} />
-                      </Pressable>
-                    ))}
-                </View>
-              </View>
-            ),
-          )}
         </>
       )}
-    </ScrollView>
+    </View>
+  );
+
+  return (
+    <>
+      <Stack.Screen options={{ ...chrome, title: t.yearlyRecap }} />
+      <FlatList
+        key={shown}
+        data={list}
+        keyExtractor={(row) => row.key}
+        ListHeaderComponent={header}
+        contentContainerStyle={styles.wrap}
+        initialNumToRender={6}
+        windowSize={5}
+        renderItem={({ item }) =>
+          item.month !== undefined ? (
+            <Text style={styles.monthLabel}>{monthName(item.month)}</Text>
+          ) : (
+            <View style={styles.grid}>
+              {item.prints!.map((x) => (
+                <Pressable
+                  key={x.id}
+                  style={[styles.print, { transform: [{ rotate: tilt(x.id, 3) }] }]}
+                  onPress={() => router.push({ pathname: '/memory/[id]', params: { id: String(x.id) } })}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.openMemory(x.title ?? monthName(new Date(x.memoryDate).getMonth()))}
+                >
+                  <Photo file={x.cover} style={{ width: '100%', aspectRatio: 1 }} />
+                  <Pin id={x.id} size={11} />
+                </Pressable>
+              ))}
+            </View>
+          )
+        }
+      />
+    </>
   );
 }
 
@@ -117,9 +138,15 @@ const useStyles = makeStyles((c) => ({
   title: { fontSize: 30, fontWeight: '700', color: c.ink, marginTop: 4 },
   big: { fontSize: 18, color: c.ink, marginTop: 4 },
   line: { fontSize: 15, color: c.muted },
-  month: { marginTop: 22, gap: 12 },
-  monthLabel: { fontSize: 13, color: c.muted, textTransform: 'uppercase', letterSpacing: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
+  monthLabel: {
+    fontSize: 13,
+    color: c.muted,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginTop: 22,
+    marginBottom: 12,
+  },
+  grid: { flexDirection: 'row', gap: 14, marginBottom: 14 },
   print: {
     width: '29%',
     backgroundColor: c.frame,

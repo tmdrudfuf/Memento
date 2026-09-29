@@ -73,7 +73,9 @@ export default function Paywall() {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <Stack.Screen options={{ ...chrome, title: '' }} />
-      <Text style={styles.title}>{copy.title}</Text>
+      <Text style={styles.title} accessibilityRole="header">
+        {copy.title}
+      </Text>
       <Text style={styles.body}>{copy.body}</Text>
 
       <View style={styles.benefits}>

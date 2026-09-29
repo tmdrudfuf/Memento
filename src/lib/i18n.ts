@@ -177,6 +177,8 @@ const en = {
   preparingBackup: (done: number, total: number) =>
     total ? `Preparing backup… ${done}/${total}` : 'Preparing backup…',
   restoring: 'Restoring…',
+  backupParts: (n: number) =>
+    `Your backup was saved as ${n} files. Keep all of them; restore each one to get everything back.`,
   restoreTitle: 'Restore from a backup?',
   restoreBody: 'Boards and memories from the backup are added to this phone. Nothing here is deleted.',
   restoreDone: (jars: number, memories: number) =>
@@ -184,6 +186,13 @@ const en = {
   restoreNothing: 'Everything in this backup is already on this phone.',
   notABackup: 'This file isn’t a Memento backup.',
   backupFailed: 'Backup didn’t finish',
+  // Arrange
+  arrangeBoards: 'Arrange boards',
+  arrangeHint: 'Use the arrows to set the order of boards on your Home screen.',
+  sortRecent: 'Sort by recent use instead',
+  moveUp: (name: string) => `Move ${name} up`,
+  moveDown: (name: string) => `Move ${name} down`,
+  done: 'Done',
 };
 
 type Dict = typeof en;
@@ -347,12 +356,19 @@ const ko: Dict = {
   restoreBackup: '백업에서 복원',
   preparingBackup: (done, total) => (total ? `백업 준비 중… ${done}/${total}` : '백업 준비 중…'),
   restoring: '복원 중…',
+  backupParts: (n) => `백업이 파일 ${n}개로 저장됐어요. 모두 보관하고, 복원할 때 파일마다 한 번씩 복원하세요.`,
   restoreTitle: '백업에서 복원할까요?',
   restoreBody: '백업의 추억 보드와 추억이 이 휴대폰에 추가돼요. 지금 있는 추억은 삭제되지 않아요.',
   restoreDone: (jars, memories) => `추억 ${memories}개${jars ? `와 새 추억 보드 ${jars}개` : ''}를 복원했어요.`,
   restoreNothing: '이 백업의 추억은 이미 모두 이 휴대폰에 있어요.',
   notABackup: 'Memento 백업 파일이 아니에요.',
   backupFailed: '백업을 완료하지 못했어요',
+  arrangeBoards: '추억 보드 정렬',
+  arrangeHint: '화살표로 홈 화면의 추억 보드 순서를 정하세요.',
+  sortRecent: '최근 사용 순으로 되돌리기',
+  moveUp: (name) => `${name} 위로 이동`,
+  moveDown: (name) => `${name} 아래로 이동`,
+  done: '완료',
 };
 
 // ponytail: language fixed at launch; switching phone language applies on next app start.

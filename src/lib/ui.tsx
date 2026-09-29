@@ -140,7 +140,8 @@ export function BoardThumb({ covers, width = 156 }: { covers: string[]; width?: 
   const height = Math.round(width * 0.8);
   const inner = { w: width - 12, h: height - 12 };
   const prints = covers.slice(0, 3);
-  const print = prints.length === 1 ? 62 : 50;
+  const print = Math.round(width * (prints.length === 1 ? 0.4 : 0.32)); // scales with the board
+  const pin = Math.max(5, Math.round(width * 0.058));
   return (
     <View style={[styles.boardFrame, { width, height }]}>
       <BoardSurface style={{ flex: 1, borderRadius: 3, overflow: 'hidden' }}>
@@ -168,7 +169,7 @@ export function BoardThumb({ covers, width = 156 }: { covers: string[]; width?: 
                 ]}
               >
                 <Photo file={f} style={{ width: '100%', aspectRatio: 1 }} />
-                <Pin id={hash(f)} size={9} />
+                <Pin id={hash(f)} size={pin} />
               </View>
             );
           })
@@ -220,7 +221,9 @@ export function Empty({ title, children }: { title: string; children?: ReactNode
   const styles = useStyles();
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyTitle}>{title}</Text>
+      <Text style={styles.emptyTitle} accessibilityRole="header">
+        {title}
+      </Text>
       {children}
     </View>
   );

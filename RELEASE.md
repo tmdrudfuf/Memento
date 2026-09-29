@@ -23,6 +23,21 @@
 | Large images (3000×4000 JPEG) | ✅ re-encoded at q0.8, ~95 KB for test images |
 | Multiple jars & memories, stack shows latest covers | ✅ |
 
+### Big-collection QA (QA APK, emulator, 12 boards / 500 memories / 1,090 photos / 1.3 GB, 2026-09-29)
+
+| Check | Result |
+|---|---|
+| Cold start | ~1.2–1.4 s |
+| Board with 47 memories: fling scroll | 2.4% janky frames (emulator renders in software; its GPU floor is 18 ms) |
+| Yearly recap, 77 prints | before: 13.6% janky, 27 slow UI frames, 320 MB → **after virtualizing: 5.4%, 5, 252 MB** |
+| DB migration v2 → v3 on 500 memories | ✅ |
+| Font size / activity recreation while open | **bug found and fixed**: "database is locked" → error screen. WAL now set once; busy_timeout 5 s |
+| Export 1.3 GB backup | 199 s, peak 248 MB (streaming holds); zip verified on PC: 1,591 entries, CRC OK |
+| Backups over 4 GB | **risk found and fixed**: the zip lib has no Zip64 → now split into parts under 3.5 GB |
+| Large text (150%) | Settings/Home OK; rediscovery captions now wrap instead of truncating |
+| Viewer | Opens on the tapped item, swipes through cover + items (3/6 → 4/6) |
+| Arrange boards | ▲▼ order saved; Home uses it; new boards go first |
+
 ### Backup QA (Expo Go, emulator, 2026-09-28)
 
 | Case | Result |

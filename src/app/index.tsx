@@ -3,7 +3,16 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { allMemoriesLite, createJar, deleteJar, getSetting, listJars, renameJar, type JarSummary } from '../lib/db';
+import {
+  allMemoriesLite,
+  createJar,
+  deleteJar,
+  getSetting,
+  listJars,
+  renameJar,
+  type JarOrder,
+  type JarSummary,
+} from '../lib/db';
 import { AdBanner } from '../lib/ads';
 import { t } from '../lib/i18n';
 import { removeFiles, saveFailed, startCapture } from '../lib/media';
@@ -35,7 +44,7 @@ export default function Home() {
   const [dialog, setDialog] = useState<{ mode: 'new' } | { mode: 'rename'; jar: JarSummary } | null>(null);
 
   const load = useCallback(() => {
-    listJars(db).then(setJars);
+    getSetting(db, 'boardOrder').then((o) => listJars(db, (o as JarOrder) ?? 'recent').then(setJars));
     allMemoriesLite(db).then((rows) => setLite({ rows, now: Date.now() }));
   }, [db]);
   useFocusEffect(load);
@@ -149,6 +158,7 @@ export default function Home() {
             ? [
                 { label: t.open, onPress: () => open(menuFor.id) },
                 { label: t.rename, onPress: () => setDialog({ mode: 'rename', jar: menuFor }) },
+                { label: t.arrangeBoards, onPress: () => router.push('/arrange') },
                 { label: t.deleteJar, destructive: true, onPress: () => confirmDelete(menuFor) },
               ]
             : []
@@ -212,7 +222,7 @@ function Rediscover({ rows, now, premium }: { rows: MemoryLite[]; now: number; p
                   <Photo file={m.cover} style={{ width: '100%', aspectRatio: 1 }} />
                   <Pin id={m.id} size={10} />
                 </View>
-                <Text style={styles.pastCaption} numberOfLines={1}>
+                <Text style={styles.pastCaption} numberOfLines={2}>
                   {t.yearsAgo(yearsAgo(m.memoryDate, now))}
                 </Text>
               </Pressable>
@@ -252,7 +262,7 @@ const useStyles = makeStyles((c) => ({
   link: { color: c.accent },
   pastRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 6 },
   pastItem: { width: 76, gap: 6, alignItems: 'center' },
-  pastCaption: { fontSize: 12, color: c.muted },
+  pastCaption: { fontSize: 12, color: c.muted, textAlign: 'center' },
   miniPrint: {
     width: 76,
     backgroundColor: c.frame,

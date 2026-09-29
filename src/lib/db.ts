@@ -3,7 +3,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 // Subset of expo-sqlite used here, so tests can back it with node:sqlite.
 export type DB = Pick<SQLiteDatabase, 'execAsync' | 'runAsync' | 'getAllAsync' | 'getFirstAsync'>;
 
-export type Jar = { id: number; name: string; createdAt: number; updatedAt: number };
+export type Jar = { id: number; name: string; createdAt: number; updatedAt: number; position?: number | null };
 export type JarSummary = Jar & { count: number; covers: string[] };
 export type Memory = {
   id: number;
@@ -20,14 +20,18 @@ export type Memory = {
 export type MediaKind = 'photo' | 'video';
 export type Media = { id: number; memoryId: number; file: string; kind: MediaKind; createdAt: number };
 
-const VERSION = 2;
+const VERSION = 3;
 
 export async function migrate(db: DB) {
-  await db.execAsync('PRAGMA foreign_keys = ON; PRAGMA journal_mode = WAL;');
+  // Per-connection settings only. busy_timeout: when Android recreates the activity (font size,
+  // theme, memory pressure) a new connection may open while the old one still holds a lock.
+  await db.execAsync('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
   let v = row?.user_version ?? 0;
   if (v >= VERSION) return;
   if (v === 0) {
+    // WAL is stored in the database file, so it's set once here rather than on every open (it needs a lock).
+    await db.execAsync('PRAGMA journal_mode = WAL;');
     await db.execAsync(`
       CREATE TABLE jars (
         id INTEGER PRIMARY KEY NOT NULL,
@@ -64,18 +68,32 @@ export async function migrate(db: DB) {
     await db.execAsync('CREATE TABLE settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);');
     v = 2;
   }
+  if (v === 2) {
+    // Manual board order (NULL until the user arranges boards).
+    await db.execAsync('ALTER TABLE jars ADD COLUMN position INTEGER;');
+    v = 3;
+  }
   await db.execAsync(`PRAGMA user_version = ${VERSION}`);
 }
 
-// Jars, most recently used first (updatedAt is bumped when a memory is added).
-export async function listJars(db: DB): Promise<JarSummary[]> {
+export type JarOrder = 'recent' | 'custom';
+
+// Jars: most recently used first, or the user's arranged order ('custom').
+export async function listJars(db: DB, order: JarOrder = 'recent'): Promise<JarSummary[]> {
+  const orderBy =
+    order === 'custom' ? 'COALESCE(j.position, -1e12) ASC, j.updatedAt DESC, j.id DESC' : 'j.updatedAt DESC, j.id DESC';
   const rows = await db.getAllAsync<Jar & { count: number; covers: string | null }>(`
     SELECT j.*,
       (SELECT COUNT(*) FROM memories m WHERE m.jarId = j.id) AS count,
       (SELECT group_concat(cover, '|') FROM
         (SELECT cover FROM memories m WHERE m.jarId = j.id ORDER BY memoryDate DESC, id DESC LIMIT 3)) AS covers
-    FROM jars j ORDER BY j.updatedAt DESC, j.id DESC`);
+    FROM jars j ORDER BY ${orderBy}`);
   return rows.map((r) => ({ ...r, covers: r.covers ? r.covers.split('|') : [] }));
+}
+
+/** Saves the user's board order (first id = top). */
+export async function setJarOrder(db: DB, ids: number[]) {
+  for (let i = 0; i < ids.length; i++) await db.runAsync('UPDATE jars SET position = ? WHERE id = ?', [i, ids[i]]);
 }
 
 export function getJar(db: DB, id: number) {
@@ -85,7 +103,11 @@ export function getJar(db: DB, id: number) {
 export async function createJar(db: DB, name: string, now = Date.now()) {
   const trimmed = name.trim();
   if (!trimmed) throw new Error('Jar name is required');
-  const r = await db.runAsync('INSERT INTO jars (name, createdAt, updatedAt) VALUES (?, ?, ?)', [trimmed, now, now]);
+  // New boards go first in a custom order too (position below the current minimum).
+  const r = await db.runAsync(
+    'INSERT INTO jars (name, createdAt, updatedAt, position) VALUES (?, ?, ?, (SELECT MIN(position) - 1 FROM jars))',
+    [trimmed, now, now],
+  );
   return r.lastInsertRowId;
 }
 

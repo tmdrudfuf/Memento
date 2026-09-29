@@ -136,7 +136,9 @@ export default function Memory() {
     ]);
   }
 
-  const view = (file: string, kind: 'photo' | 'video') => router.push({ pathname: '/viewer', params: { file, kind } });
+  // 0 = cover, then related items in order (matches the viewer's pages).
+  const view = (index: number) =>
+    router.push({ pathname: '/viewer', params: { memory: String(id), index: String(index) } });
 
   if (!m) return null;
 
@@ -159,7 +161,7 @@ export default function Memory() {
         }}
       />
       <ScrollView contentContainerStyle={{ paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
-        <Pressable onPress={() => view(m.cover, 'photo')} accessibilityLabel={t.viewCover}>
+        <Pressable onPress={() => view(0)} accessibilityLabel={t.viewCover}>
           <Photo file={m.cover} style={{ width: '100%', aspectRatio: 1 }} />
         </Pressable>
 
@@ -207,13 +209,15 @@ export default function Memory() {
             maxLength={1000}
           />
 
-          <Text style={styles.section}>{t.insideMemory}</Text>
+          <Text style={styles.section} accessibilityRole="header">
+            {t.insideMemory}
+          </Text>
           <View style={styles.grid}>
-            {media.map((it) => (
+            {media.map((it, i) => (
               <Pressable
                 key={it.id}
                 style={styles.tile}
-                onPress={() => view(it.file, it.kind)}
+                onPress={() => view(i + 1)}
                 onLongPress={() => setItemMenu(it)}
                 accessibilityLabel={t.itemA11y(it.kind)}
               >

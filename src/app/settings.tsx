@@ -27,10 +27,12 @@ import { useColors } from '../lib/ui';
 
 const { site: SITE, privacy: PRIVACY, support: SUPPORT } = config.links;
 
-const formatBytes = (b: number) =>
-  b < 1024 * 1024
-    ? `${Math.max(1, Math.round(b / 1024))} KB`
-    : `${(b / 1024 / 1024).toFixed(b < 100 * 1024 * 1024 ? 1 : 0)} MB`;
+const formatBytes = (b: number) => {
+  const mb = b / 1024 / 1024;
+  if (mb < 1) return `${Math.max(1, Math.round(b / 1024))} KB`;
+  if (mb < 1024) return `${mb.toFixed(mb < 100 ? 1 : 0)} MB`;
+  return `${(mb / 1024).toFixed(1)} GB`;
+};
 
 export default function Settings() {
   const db = useSQLiteContext();
@@ -46,7 +48,8 @@ export default function Settings() {
   async function doExport() {
     setBusy(t.preparingBackup(0, 0));
     try {
-      await exportBackup(db, (done, total) => setBusy(t.preparingBackup(done, total)));
+      const parts = await exportBackup(db, (done, total) => setBusy(t.preparingBackup(done, total)));
+      if (parts > 1) Alert.alert(t.backupParts(parts));
     } catch (e) {
       console.warn(e);
       Alert.alert(t.backupFailed, t.tryAgainBody);
@@ -219,7 +222,9 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   const styles = useStyles();
   return (
     <View style={{ gap: 8 }}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionTitle} accessibilityRole="header">
+        {title}
+      </Text>
       <View style={styles.card}>{children}</View>
     </View>
   );

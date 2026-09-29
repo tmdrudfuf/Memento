@@ -229,7 +229,10 @@ test('backup round-trip into an empty device restores everything', async () => {
   const [mem] = await q.listMemories(dst, jar.id);
   assert.equal(mem.title, 'Ramen Night');
   assert.equal(mem.note, 'no English menu');
-  assert.deepEqual((await q.listMedia(dst, mem.id)).map((x) => x.file), ['v.mp4']);
+  assert.deepEqual(
+    (await q.listMedia(dst, mem.id)).map((x) => x.file),
+    ['v.mp4'],
+  );
 });
 
 test('restoring twice does not duplicate; same-name jar is merged', async () => {
@@ -249,4 +252,41 @@ test('restoring twice does not duplicate; same-name jar is merged', async () => 
 test('isBackup rejects other files', () => {
   assert.equal(q.isBackup({ format: 'zip' }), false);
   assert.equal(q.isBackup(null), false);
+});
+
+test('custom board order: arranged order kept, new board goes first, recent order unaffected', async () => {
+  const db = await fresh();
+  const a = await q.createJar(db, 'A', 1);
+  const b = await q.createJar(db, 'B', 2);
+  const c = await q.createJar(db, 'C', 3);
+  await q.setJarOrder(db, [a, c, b]);
+  assert.deepEqual(
+    (await q.listJars(db, 'custom')).map((j) => j.name),
+    ['A', 'C', 'B'],
+  );
+  const d = await q.createJar(db, 'D', 4);
+  assert.deepEqual(
+    (await q.listJars(db, 'custom')).map((j) => j.id),
+    [d, a, c, b],
+  );
+  await q.createMemory(db, { jarId: b, cover: 'x' }, 10); // using B doesn't move it in custom order
+  assert.equal((await q.listJars(db, 'custom'))[3].id, b);
+  assert.equal((await q.listJars(db))[0].id, b); // but it's first by recent use
+});
+
+test('v2 database migrates to v3 (position column) keeping data', async () => {
+  const db = open();
+  await db.execAsync(`
+    CREATE TABLE jars (id INTEGER PRIMARY KEY NOT NULL, name TEXT NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL);
+    CREATE TABLE memories (id INTEGER PRIMARY KEY NOT NULL, jarId INTEGER NOT NULL REFERENCES jars(id) ON DELETE CASCADE, cover TEXT NOT NULL, title TEXT, note TEXT, memoryDate INTEGER NOT NULL, createdAt INTEGER NOT NULL, updatedAt INTEGER NOT NULL, openCount INTEGER NOT NULL DEFAULT 0, lastOpenedAt INTEGER);
+    CREATE TABLE media (id INTEGER PRIMARY KEY NOT NULL, memoryId INTEGER NOT NULL REFERENCES memories(id) ON DELETE CASCADE, file TEXT NOT NULL, kind TEXT NOT NULL CHECK (kind IN ('photo', 'video')), createdAt INTEGER NOT NULL);
+    CREATE TABLE settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL);
+    INSERT INTO jars VALUES (1, 'Old', 1, 1);
+    PRAGMA user_version = 2;`);
+  await q.migrate(db);
+  const [j] = await q.listJars(db, 'custom');
+  assert.equal(j.name, 'Old');
+  assert.equal(j.position, null);
+  await q.createJar(db, 'New');
+  assert.equal((await q.listJars(db, 'custom')).length, 2);
 });

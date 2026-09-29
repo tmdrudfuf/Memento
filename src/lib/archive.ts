@@ -2,13 +2,34 @@
 // Media is stored, not compressed: JPEG/MP4 are already compressed, and it keeps memory use flat.
 import { strFromU8, strToU8, Unzip, UnzipInflate, Zip, ZipPassThrough } from 'fflate';
 
-export const CHUNK = 256 * 1024;
+export const CHUNK = 1024 * 1024;
+/** fflate writes no Zip64, so every archive must stay under 4 GB; parts are capped with headroom. */
+export const PART_LIMIT = 3.5 * 1024 ** 3;
 export const JSON_NAME = 'memento.json';
 
 /** Only plain file names we generated ourselves; blocks "../" and absolute paths from untrusted zips. */
 export const safeMediaName = (name: string) => /^[A-Za-z0-9][A-Za-z0-9._-]{0,120}$/.test(name) && !name.includes('..');
 
 export type Source = { name: string; size: number; read: (length: number) => Uint8Array };
+
+/**
+ * Groups files into parts whose total size stays under `limit` (order kept). Each part becomes its own
+ * zip with the full memento.json, so parts can be restored in any order.
+ * ponytail: a single file larger than 4 GB still can't be zipped; not realistic for phone videos yet.
+ */
+export function splitParts<T extends { size: number }>(files: T[], limit = PART_LIMIT): T[][] {
+  const parts: T[][] = [[]];
+  let used = 0;
+  for (const f of files) {
+    if (used + f.size > limit && parts[parts.length - 1].length) {
+      parts.push([]);
+      used = 0;
+    }
+    parts[parts.length - 1].push(f);
+    used += f.size;
+  }
+  return parts;
+}
 
 const tick = () => new Promise((r) => setTimeout(r, 0)); // let the UI breathe between chunks
 

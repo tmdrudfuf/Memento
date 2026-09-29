@@ -36,6 +36,7 @@ export default function RootLayout() {
               <Stack.Screen name="capture" options={{ presentation: 'modal', title: t.captureTitle }} />
               <Stack.Screen name="settings" options={{ title: t.settings }} />
               <Stack.Screen name="recap" options={{ title: t.yearlyRecap }} />
+              <Stack.Screen name="arrange" options={{ title: t.arrangeBoards }} />
               <Stack.Screen name="paywall" options={{ presentation: 'modal', title: '' }} />
               <Stack.Screen
                 name="welcome"

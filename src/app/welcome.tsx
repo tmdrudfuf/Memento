@@ -20,7 +20,9 @@ export default function Welcome() {
     <SafeAreaView style={styles.wrap}>
       <View style={styles.center}>
         <Image source={require('../../assets/splash-icon.png')} style={styles.mark} contentFit="contain" />
-        <Text style={styles.title}>{t.welcomeTitle}</Text>
+        <Text style={styles.title} accessibilityRole="header">
+          {t.welcomeTitle}
+        </Text>
         <View style={styles.points}>
           <Point n="1" text={t.welcome1} />
           <Point n="2" text={t.welcome2} />
