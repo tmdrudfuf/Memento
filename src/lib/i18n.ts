@@ -104,6 +104,26 @@ const en = {
   errorBody: 'Your memories are safe on this device.',
   tryAgain: 'Try again',
   closeMenu: 'Close menu',
+  // Rediscovery & recap
+  rememberThis: 'Remember this?',
+  onThisDay: 'On this day',
+  thisWeek: 'This week, years ago',
+  yearsAgo: (n: number) => (n === 1 ? '1 year ago' : `${n} years ago`),
+  recapTitle: (year: number) => `Your ${year} in Memories`,
+  recapCardBody: 'Look back at the moments you kept this year.',
+  recapStats: (count: number, jars: number) =>
+    `${count === 1 ? '1 memory' : `${count} memories`} in ${jars === 1 ? '1 jar' : `${jars} jars`}`,
+  busiestMonth: (month: string) => `Your fullest month was ${month}.`,
+  topJar: (name: string) => `Most collected: ${name}`,
+  recapEmpty: 'No memories in this year yet.',
+  yearlyRecap: 'Yearly recap',
+  reminders: 'Reminders',
+  weeklyReminder: 'Weekly “Remember this?”',
+  reminderNote: 'One gentle nudge on Sunday evening to revisit a memory.',
+  reminderTitle: 'Remember this?',
+  reminderBody: 'A moment from your jars is waiting for you.',
+  notifDeniedTitle: 'Notifications are off',
+  notifDeniedBody: 'Allow notifications for Memento in your phone’s Settings.',
 };
 
 type Dict = typeof en;
@@ -202,6 +222,24 @@ const ko: Dict = {
   errorBody: '추억은 이 기기에 안전하게 보관되어 있어요.',
   tryAgain: '다시 시도',
   closeMenu: '메뉴 닫기',
+  rememberThis: '이 순간, 기억나요?',
+  onThisDay: '이날의 추억',
+  thisWeek: '몇 해 전 이맘때',
+  yearsAgo: (n) => `${n}년 전`,
+  recapTitle: (year) => `${year}년의 추억`,
+  recapCardBody: '올해 담은 순간들을 돌아보세요.',
+  recapStats: (count, jars) => `추억 병 ${jars}개에 담은 추억 ${count}개`,
+  busiestMonth: (month) => `가장 추억이 많았던 달은 ${month}이에요.`,
+  topJar: (name) => `가장 많이 담은 추억 병: ${name}`,
+  recapEmpty: '이 해에는 아직 추억이 없어요.',
+  yearlyRecap: '연간 추억 돌아보기',
+  reminders: '알림',
+  weeklyReminder: '매주 “이 순간, 기억나요?”',
+  reminderNote: '일요일 저녁, 추억을 다시 볼 수 있게 한 번 알려드려요.',
+  reminderTitle: '이 순간, 기억나요?',
+  reminderBody: '추억 병 속 한 순간이 기다리고 있어요.',
+  notifDeniedTitle: '알림이 꺼져 있어요',
+  notifDeniedBody: '휴대폰 설정에서 Memento 알림을 허용해주세요.',
 };
 
 // ponytail: language fixed at launch; switching phone language applies on next app start.

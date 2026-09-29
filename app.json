@@ -63,7 +63,14 @@
           "backgroundColor": "#F4EFE6"
         }
       ],
-      "./plugins/withReleaseSigning"
+      "./plugins/withReleaseSigning",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#C8553D"
+        }
+      ]
     ],
     "scheme": "memento",
     "experiments": {

@@ -2,10 +2,11 @@ import Constants from 'expo-constants';
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState, type ReactNode } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { deleteAllData, stats } from '../lib/db';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { deleteAllData, getSetting, setSetting, stats } from '../lib/db';
 import { removeAllMedia, storageUsed } from '../lib/media';
 import { t } from '../lib/i18n';
+import { disableWeeklyReminder, enableWeeklyReminder } from '../lib/reminder';
 import { makeStyles, useChrome } from '../lib/theme';
 import { useColors } from '../lib/ui';
 
@@ -22,11 +23,33 @@ export default function Settings() {
   const styles = useStyles();
   const [s, setS] = useState({ memories: 0, jars: 0, revisited: 0 });
   const [bytes, setBytes] = useState(0);
+  const [reminder, setReminder] = useState(false);
+  const c = useColors();
 
   const load = useCallback(() => {
     stats(db).then(setS);
     setBytes(storageUsed());
+    getSetting(db, 'weeklyReminder').then((v) => setReminder(v === '1'));
   }, [db]);
+
+  async function toggleReminder(on: boolean) {
+    setReminder(on);
+    try {
+      if (on && !(await enableWeeklyReminder())) {
+        setReminder(false);
+        Alert.alert(t.notifDeniedTitle, t.notifDeniedBody, [
+          { text: t.ok },
+          { text: t.openSettings, onPress: () => Linking.openSettings() },
+        ]);
+        return;
+      }
+      if (!on) await disableWeeklyReminder();
+      await setSetting(db, 'weeklyReminder', on ? '1' : '0');
+    } catch (e) {
+      console.warn(e);
+      setReminder(!on);
+    }
+  }
   useFocusEffect(load);
 
   function confirmDeleteAll() {
@@ -59,7 +82,23 @@ export default function Settings() {
         <Row label={t.memoriesLabel} value={String(s.memories)} />
         <Row label={t.jarsLabel} value={String(s.jars)} />
         <Row label={t.revisited} value={String(s.revisited)} />
-        <Row label={t.storageUsed} value={formatBytes(bytes)} last />
+        <Row label={t.storageUsed} value={formatBytes(bytes)} />
+        <Row label={t.yearlyRecap} onPress={() => router.push('/recap')} last />
+      </Section>
+
+      <Section title={t.reminders}>
+        <View style={[styles.row, { gap: 12 }]}>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={styles.label}>{t.weeklyReminder}</Text>
+            <Text style={styles.sub}>{t.reminderNote}</Text>
+          </View>
+          <Switch
+            value={reminder}
+            onValueChange={toggleReminder}
+            trackColor={{ true: c.accent, false: c.line }}
+            accessibilityLabel={t.weeklyReminder}
+          />
+        </View>
       </Section>
 
       <Section title={t.privacy}>
@@ -127,5 +166,6 @@ const useStyles = makeStyles((c) => ({
   label: { fontSize: 16, color: c.ink },
   value: { fontSize: 16, color: c.muted },
   chevron: { fontSize: 22, color: c.muted, lineHeight: 22 },
+  sub: { color: c.muted, fontSize: 13, lineHeight: 18 },
   note: { color: c.muted, fontSize: 14, lineHeight: 20, padding: 16, paddingBottom: 4 },
 }));

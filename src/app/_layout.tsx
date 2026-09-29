@@ -24,6 +24,7 @@ export default function RootLayout() {
           <Stack.Screen name="memory/[id]" options={{ title: '' }} />
           <Stack.Screen name="capture" options={{ presentation: 'modal', title: t.captureTitle }} />
           <Stack.Screen name="settings" options={{ title: t.settings }} />
+          <Stack.Screen name="recap" options={{ title: t.yearlyRecap }} />
           <Stack.Screen name="welcome" options={{ presentation: 'fullScreenModal', headerShown: false }} />
           <Stack.Screen
             name="viewer"

@@ -239,3 +239,16 @@ export async function setSetting(db: DB, key: string, value: string) {
     [key, value],
   );
 }
+
+/** Light rows for rediscovery and recaps (no notes). */
+export function allMemoriesLite(db: DB) {
+  return db.getAllAsync<{
+    id: number;
+    jarId: number;
+    cover: string;
+    title: string | null;
+    memoryDate: number;
+    createdAt: number;
+    lastOpenedAt: number | null;
+  }>('SELECT id, jarId, cover, title, memoryDate, createdAt, lastOpenedAt FROM memories');
+}

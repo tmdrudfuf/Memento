@@ -65,4 +65,5 @@ if __name__ == "__main__":
     Image.new("RGBA", (1024, 1024), PAPER).save("assets/android-icon-background.png")
     mark(1024, mono=True, scale=0.62).save("assets/android-icon-monochrome.png")
     mark(1024, scale=0.75).save("assets/splash-icon.png")
+    mark(96, mono=True, scale=0.85).save("assets/notification-icon.png")  # Android: white on transparent
     print("icons written")

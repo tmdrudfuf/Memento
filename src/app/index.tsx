@@ -3,12 +3,21 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { createJar, deleteJar, getSetting, listJars, renameJar, type JarSummary } from '../lib/db';
+import { allMemoriesLite, createJar, deleteJar, getSetting, listJars, renameJar, type JarSummary } from '../lib/db';
 import { t } from '../lib/i18n';
 import { removeFiles, saveFailed, startCapture } from '../lib/media';
+import {
+  onThisDay,
+  recap,
+  recapSeasonYear,
+  rememberThis,
+  thisWeekInPastYears,
+  yearsAgo,
+  type MemoryLite,
+} from '../lib/rediscover';
 import { NameDialog, Sheet } from '../lib/sheet';
 import { makeStyles, useChrome } from '../lib/theme';
-import { CaptureBar, CoverStack, Empty } from '../lib/ui';
+import { CaptureBar, CoverStack, Empty, formatDate, Photo } from '../lib/ui';
 
 const NEW = -1; // sentinel item for the "New jar" tile
 
@@ -17,11 +26,13 @@ export default function Home() {
   const chrome = useChrome();
   const styles = useStyles();
   const [jars, setJars] = useState<JarSummary[] | null>(null);
+  const [lite, setLite] = useState<{ rows: MemoryLite[]; now: number }>({ rows: [], now: 0 });
   const [menuFor, setMenuFor] = useState<JarSummary | null>(null);
   const [dialog, setDialog] = useState<{ mode: 'new' } | { mode: 'rename'; jar: JarSummary } | null>(null);
 
   const load = useCallback(() => {
     listJars(db).then(setJars);
+    allMemoriesLite(db).then((rows) => setLite({ rows, now: Date.now() }));
   }, [db]);
   useFocusEffect(load);
 
@@ -84,6 +95,7 @@ export default function Home() {
         keyExtractor={(j) => String(j.id)}
         contentContainerStyle={{ padding: 12, flexGrow: 1 }}
         columnWrapperStyle={{ gap: 12 }}
+        ListHeaderComponent={<Rediscover rows={lite.rows} now={lite.now} />}
         ListEmptyComponent={
           <Empty title={t.shelfEmptyTitle}>
             <Text style={styles.hint}>{t.shelfEmptyHint}</Text>
@@ -149,7 +161,85 @@ export default function Home() {
   );
 }
 
+const openMemory = (id: number) => router.push({ pathname: '/memory/[id]', params: { id: String(id) } });
+
+// Brings old memories back to the shelf: yearly recap in season, "on this day", else "remember this?".
+function Rediscover({ rows, now }: { rows: MemoryLite[]; now: number }) {
+  const styles = useStyles();
+  const season = recapSeasonYear(now);
+  const showRecap = season !== null && recap(rows, season).count > 0;
+  const exact = onThisDay(rows, now);
+  const past = (exact.length ? exact : thisWeekInPastYears(rows, now)).slice(0, 6);
+  const remember = past.length ? null : rememberThis(rows, now);
+  if (!showRecap && !past.length && !remember) return null;
+  return (
+    <View style={{ gap: 12, marginBottom: 8 }}>
+      {showRecap && (
+        <Pressable
+          style={styles.card}
+          onPress={() => router.push({ pathname: '/recap', params: { year: String(season) } })}
+          accessibilityRole="button"
+        >
+          <Text style={styles.cardTitle}>{t.recapTitle(season!)}</Text>
+          <Text style={styles.cardBody}>{t.recapCardBody}</Text>
+        </Pressable>
+      )}
+      {past.length > 0 && (
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>{exact.length ? t.onThisDay : t.thisWeek}</Text>
+          <View style={styles.pastRow}>
+            {past.map((m) => (
+              <Pressable key={m.id} style={styles.pastItem} onPress={() => openMemory(m.id)} accessibilityRole="button">
+                <View style={styles.miniPrint}>
+                  <Photo file={m.cover} style={{ width: '100%', aspectRatio: 1 }} />
+                </View>
+                <Text style={styles.pastCaption} numberOfLines={1}>
+                  {t.yearsAgo(yearsAgo(m.memoryDate, now))}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
+      {remember && (
+        <Pressable style={[styles.card, styles.rememberCard]} onPress={() => openMemory(remember.id)} accessibilityRole="button">
+          <View style={[styles.miniPrint, { width: 84 }]}>
+            <Photo file={remember.cover} style={{ width: '100%', aspectRatio: 1 }} />
+          </View>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Text style={styles.cardLabel}>{t.rememberThis}</Text>
+            <Text style={styles.cardTitle} numberOfLines={2}>
+              {remember.title || formatDate(remember.memoryDate)}
+            </Text>
+            {remember.title ? <Text style={styles.cardBody}>{formatDate(remember.memoryDate)}</Text> : null}
+          </View>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 const useStyles = makeStyles((c) => ({
+  card: { backgroundColor: c.card, borderRadius: 16, padding: 16, gap: 6 },
+  rememberCard: { flexDirection: 'row', alignItems: 'center', gap: 16 },
+  cardLabel: { fontSize: 12, color: c.muted, textTransform: 'uppercase', letterSpacing: 1 },
+  cardTitle: { fontSize: 17, fontWeight: '600', color: c.ink },
+  cardBody: { fontSize: 14, color: c.muted },
+  pastRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 6 },
+  pastItem: { width: 76, gap: 6, alignItems: 'center' },
+  pastCaption: { fontSize: 12, color: c.muted },
+  miniPrint: {
+    width: 76,
+    backgroundColor: c.frame,
+    padding: 4,
+    paddingBottom: 10,
+    borderRadius: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.12,
+    shadowRadius: 3,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
   jar: { flex: 1, maxWidth: '50%', alignItems: 'center', paddingVertical: 16 },
   jarName: { fontSize: 16, fontWeight: '600', color: c.ink, marginTop: 10 },
   muted: { color: c.muted },
