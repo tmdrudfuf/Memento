@@ -1,0 +1,19 @@
+// Public identifiers (safe to ship in the app; none of these are secrets).
+// Empty values = not set up yet: purchases show as unavailable, ads use Google's test units.
+export const config = {
+  revenueCat: {
+    androidKey: '', // RevenueCat → Project → API keys → Google Play public SDK key (goog_...)
+    iosKey: '', // RevenueCat → Project → API keys → App Store public SDK key (appl_...)
+    entitlement: 'premium', // one entitlement unlocked by monthly, yearly and Founder's Lifetime
+  },
+  admob: {
+    androidBanner: '', // AdMob → Apps → Memento (Android) → Ad units → banner (ca-app-pub-.../...)
+    iosBanner: '',
+  },
+  links: {
+    site: 'https://tmdrudfuf.github.io/Memento/',
+    privacy: 'https://tmdrudfuf.github.io/Memento/privacy.html',
+    terms: 'https://tmdrudfuf.github.io/Memento/terms.html',
+    support: 'https://github.com/tmdrudfuf/Memento/issues',
+  },
+};

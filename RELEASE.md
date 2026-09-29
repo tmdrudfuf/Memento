@@ -23,6 +23,17 @@
 | Large images (3000×4000 JPEG) | ✅ re-encoded at q0.8, ~95 KB for test images |
 | Multiple jars & memories, stack shows latest covers | ✅ |
 
+### Monetization QA (QA release APK, emulator, 2026-09-28)
+
+| Case | Result |
+|---|---|
+| Free: test adaptive banner at bottom of Home and Jar only (not Capture/Memory/Viewer/Paywall) | ✅ |
+| 4th jar (Home tile and capture "+ New jar") → "Your memories are growing." paywall | ✅ |
+| Paywall without store keys: static prices, "Purchases aren't available in this build yet." | ✅ |
+| Premium: no ads, 4th jar allowed, recap unlocked | ✅ |
+| Premium off with 4 jars: all jars open; 5th jar → paywall | ✅ |
+| Weekly reminder: permission asked only on enable; alarm registered for Sunday 19:00 | ✅ |
+
 ### Standalone release APK (local build, emulator, 2026-09-27)
 
 | Case | Result |
@@ -64,6 +75,31 @@ Blocked items need the owner (masterplan §26).
 | Support URL | https://tmdrudfuf.github.io/Memento/ | ✅ |
 | Privacy policy URL | https://tmdrudfuf.github.io/Memento/privacy.html (GitHub Pages from `/docs`; contact = repo Issues) | ✅ |
 | Bundle ID | `com.tmdrudfuf.memento` (iOS + Android). Permanent after the first store upload | ✅ decided |
+
+## Monetization setup (owner accounts needed)
+
+Code is done and verified with Google test ads plus a QA Premium switch. Real money needs these, in order:
+
+1. **Google Play Console** ($25): create app `com.tmdrudfuf.memento`, set up a payments profile, upload `memento-*.aab` to Internal testing (Play requires an uploaded build before in-app products can be created).
+2. **Play products:**
+   - Subscription `premium` with base plans `monthly` ($3.99) and `yearly` ($29.99).
+   - One-time product `founders_lifetime` ($59.99).
+3. **RevenueCat** (free):
+   - Create a project, add the Play app, and link a Google service-account JSON.
+   - Create entitlement `premium` and attach all 3 products.
+   - Create offering `default` with packages Monthly, Annual and Lifetime.
+   - Remove Lifetime from the offering whenever Founder's sales should end. No app update is needed.
+   - Paste the public SDK key (`goog_…`) into `src/lib/config.ts`.
+4. **AdMob** (free):
+   - Create app Memento (Android) and one banner ad unit.
+   - Replace the Google test app ID in `app.json` (plugin + top-level `react-native-google-mobile-ads`) and put the unit ID in `src/lib/config.ts`.
+   - Create the GDPR consent message (Privacy & messaging).
+5. **Play Data safety form:**
+   - Ads: device or other IDs, collected and shared with Google for advertising (non-personalized) and fraud prevention.
+   - Purchase history: collected by RevenueCat and Google Play.
+   - No photos, videos or notes are collected.
+
+QA builds: `EXPO_PUBLIC_QA=1` before the Gradle build shows a "Premium (debug build only)" switch. Store and CI builds never set it.
 
 ## Upload key (Android)
 

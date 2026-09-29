@@ -60,7 +60,10 @@ test('jars sort by last use; covers are newest 3 by memory date', async () => {
   for (let i = 1; i <= 4; i++) await q.createMemory(db, { jarId: a, cover: `a${i}.jpg`, memoryDate: i * 10 }, 100 + i);
   await q.createMemory(db, { jarId: a, cover: 'old.jpg', memoryDate: 1 }, 200);
   const jars = await q.listJars(db);
-  assert.deepEqual(jars.map((j) => j.id), [a, b]);
+  assert.deepEqual(
+    jars.map((j) => j.id),
+    [a, b],
+  );
   assert.deepEqual(jars[0].covers, ['a4.jpg', 'a3.jpg', 'a2.jpg']);
   assert.equal(jars[0].count, 5);
   assert.deepEqual(jars[1].covers, []);
@@ -167,7 +170,10 @@ test('set cover swaps cover and related photo; videos cannot be covers', async (
   const [photo, video] = await q.listMedia(db, id);
   await q.setCover(db, id, photo.id);
   assert.equal((await q.getMemory(db, id))?.cover, 'new.jpg');
-  assert.deepEqual((await q.listMedia(db, id)).map((m) => m.file), ['old.jpg', 'v.mp4']);
+  assert.deepEqual(
+    (await q.listMedia(db, id)).map((m) => m.file),
+    ['old.jpg', 'v.mp4'],
+  );
   await assert.rejects(q.setCover(db, id, video.id));
   const other = await q.createMemory(db, { jarId: jar, cover: 'x.jpg' });
   await assert.rejects(q.setCover(db, other, photo.id), 'media from another memory');

@@ -4,9 +4,10 @@ import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { allMemoriesLite, listJars } from '../lib/db';
 import { t } from '../lib/i18n';
+import { usePremium } from '../lib/premium';
 import { recap, recapYears, type MemoryLite, type Recap as RecapData } from '../lib/rediscover';
 import { makeStyles, useChrome } from '../lib/theme';
-import { Empty, Photo, tilt } from '../lib/ui';
+import { Button, Empty, Photo, tilt } from '../lib/ui';
 
 const monthName = (m: number) => new Date(2000, m, 1).toLocaleDateString(undefined, { month: 'long' });
 
@@ -19,6 +20,7 @@ export default function Recap() {
   const [rows, setRows] = useState<MemoryLite[] | null>(null);
   const [jarNames, setJarNames] = useState(new Map<number, string>());
   const [year, setYear] = useState<number | null>(params.year ? Number(params.year) : null);
+  const { isPremium } = usePremium();
 
   useFocusEffect(
     useCallback(() => {
@@ -27,6 +29,21 @@ export default function Recap() {
     }, [db]),
   );
 
+  if (!isPremium) {
+    return (
+      <View style={styles.wrap}>
+        <Stack.Screen options={{ ...chrome, title: t.yearlyRecap }} />
+        <Empty title={t.paywallRecapTitle}>
+          <Text style={styles.line}>{t.paywallRecapBody}</Text>
+          <Button
+            label={t.seeWithPremium}
+            onPress={() => router.replace({ pathname: '/paywall', params: { reason: 'recap' } })}
+            style={{ marginTop: 12 }}
+          />
+        </Empty>
+      </View>
+    );
+  }
   if (!rows) return null;
   const years = recapYears(rows);
   const shown = year ?? years[0] ?? new Date().getFullYear();

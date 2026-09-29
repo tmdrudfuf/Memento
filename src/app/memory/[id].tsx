@@ -72,7 +72,9 @@ export default function Memory() {
 
   async function add(camera: boolean) {
     try {
-      const picked = camera ? await takeWithCamera({ videos: true }) : await pickFromLibrary({ multiple: true, videos: true });
+      const picked = camera
+        ? await takeWithCamera({ videos: true })
+        : await pickFromLibrary({ multiple: true, videos: true });
       if (!picked.length) return;
       await addMedia(db, id, picked);
       load();
@@ -145,7 +147,12 @@ export default function Memory() {
           ...chrome,
           title: '',
           headerRight: () => (
-            <Pressable onPress={() => setMenu(true)} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.memoryOptions}>
+            <Pressable
+              onPress={() => setMenu(true)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={t.memoryOptions}
+            >
               <Text style={{ color: c.ink, fontSize: 22, fontWeight: '700' }}>•••</Text>
             </Pressable>
           ),

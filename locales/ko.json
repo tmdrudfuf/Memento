@@ -1,5 +1,7 @@
 {
-  "NSPhotoLibraryUsageDescription": "Memento는 추억으로 남길 사진을 고를 때만 사진에 접근해요.",
-  "NSCameraUsageDescription": "Memento는 추억을 촬영할 때 카메라를 사용해요.",
-  "NSMicrophoneUsageDescription": "Memento는 추억 영상을 촬영할 때 소리를 녹음해요."
+  "ios": {
+    "NSPhotoLibraryUsageDescription": "Memento는 추억으로 남길 사진을 고를 때만 사진에 접근해요.",
+    "NSCameraUsageDescription": "Memento는 추억을 촬영할 때 카메라를 사용해요.",
+    "NSMicrophoneUsageDescription": "Memento는 추억 영상을 촬영할 때 소리를 녹음해요."
+  }
 }

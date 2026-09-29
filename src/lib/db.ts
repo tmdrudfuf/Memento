@@ -139,10 +139,11 @@ export async function updateMemory(
     const v = patch[k];
     return typeof v === 'string' ? v.trim() || null : (v ?? null);
   });
-  await db.runAsync(
-    `UPDATE memories SET ${keys.map((k) => `${k} = ?`).join(', ')}, updatedAt = ? WHERE id = ?`,
-    [...values, now, id],
-  );
+  await db.runAsync(`UPDATE memories SET ${keys.map((k) => `${k} = ?`).join(', ')}, updatedAt = ? WHERE id = ?`, [
+    ...values,
+    now,
+    id,
+  ]);
 }
 
 export async function markOpened(db: DB, id: number, now = Date.now()) {
@@ -162,12 +163,7 @@ export function listMedia(db: DB, memoryId: number) {
   return db.getAllAsync<Media>('SELECT * FROM media WHERE memoryId = ? ORDER BY createdAt, id', [memoryId]);
 }
 
-export async function addMedia(
-  db: DB,
-  memoryId: number,
-  items: { file: string; kind: MediaKind }[],
-  now = Date.now(),
-) {
+export async function addMedia(db: DB, memoryId: number, items: { file: string; kind: MediaKind }[], now = Date.now()) {
   for (const it of items) {
     await db.runAsync('INSERT INTO media (memoryId, file, kind, createdAt) VALUES (?, ?, ?, ?)', [
       memoryId,

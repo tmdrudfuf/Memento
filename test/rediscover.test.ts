@@ -22,7 +22,10 @@ test('on this day: same month/day in earlier years only, newest year first', () 
   const a = mem(at(2024, 9, 28));
   const b = mem(at(2025, 9, 28));
   const rows = [a, b, mem(at(2026, 9, 28)), mem(at(2025, 9, 27)), mem(at(2025, 10, 28))];
-  assert.deepEqual(r.onThisDay(rows, now).map((m) => m.id), [b.id, a.id]);
+  assert.deepEqual(
+    r.onThisDay(rows, now).map((m) => m.id),
+    [b.id, a.id],
+  );
 });
 
 test('this week in past years: ±3 days, excludes exact day and this year', () => {
@@ -30,14 +33,20 @@ test('this week in past years: ±3 days, excludes exact day and this year', () =
   const near = mem(at(2025, 10, 1)); // +3 days
   const before = mem(at(2024, 9, 25)); // -3 days
   const rows = [near, before, mem(at(2025, 9, 28)), mem(at(2025, 10, 2)), mem(at(2026, 9, 27))];
-  assert.deepEqual(r.thisWeekInPastYears(rows, now).map((m) => m.id), [near.id, before.id]);
+  assert.deepEqual(
+    r.thisWeekInPastYears(rows, now).map((m) => m.id),
+    [near.id, before.id],
+  );
 });
 
 test('this week wraps the year boundary but ignores last week', () => {
   const now = at(2026, 1, 1);
   const lastYear = mem(at(2024, 12, 30)); // a year+ ago, 2 days before "Jan 1"
   const lastWeek = mem(at(2025, 12, 30)); // only 2 days ago: not a "past years" memory
-  assert.deepEqual(r.thisWeekInPastYears([lastYear, lastWeek], now).map((m) => m.id), [lastYear.id]);
+  assert.deepEqual(
+    r.thisWeekInPastYears([lastYear, lastWeek], now).map((m) => m.id),
+    [lastYear.id],
+  );
 });
 
 test('remember this: needs a week-old memory, prefers never-opened, stable within a day', () => {
@@ -71,7 +80,10 @@ test('recap counts, months, top jar, busiest month', () => {
   assert.equal(rc.topJarId, 2);
   assert.equal(rc.months[2], 2);
   assert.equal(rc.busiestMonth, 2);
-  assert.deepEqual(rc.memories.map((m) => new Date(m.memoryDate).getMonth()), [2, 2, 6]);
+  assert.deepEqual(
+    rc.memories.map((m) => new Date(m.memoryDate).getMonth()),
+    [2, 2, 6],
+  );
   assert.deepEqual(r.recapYears(rows), [2026, 2025]);
   assert.equal(r.recap(rows, 2020).busiestMonth, null);
 });

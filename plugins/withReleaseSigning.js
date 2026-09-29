@@ -24,12 +24,13 @@ module.exports = function withReleaseSigning(config) {
       /(release \{[^}]*?)signingConfig signingConfigs\.debug/,
       "$1signingConfig System.getenv('MEMENTO_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug",
     );
-    g = g.replace(
-      /versionCode (\d+)/,
-      "versionCode Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '$1')",
-    );
+    g = g.replace(/versionCode (\d+)/, "versionCode Integer.parseInt(System.getenv('ANDROID_VERSION_CODE') ?: '$1')");
     // Fail loudly if the template changed, rather than silently shipping debug-signed builds.
-    if ((g.match(/MEMENTO_UPLOAD_STORE_FILE/g) || []).length < 3 || !g.includes('ANDROID_VERSION_CODE') || g === before) {
+    if (
+      (g.match(/MEMENTO_UPLOAD_STORE_FILE/g) || []).length < 3 ||
+      !g.includes('ANDROID_VERSION_CODE') ||
+      g === before
+    ) {
       throw new Error('withReleaseSigning: android/app/build.gradle template changed; update the plugin');
     }
     cfg.modResults.contents = g;

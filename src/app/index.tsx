@@ -4,8 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { allMemoriesLite, createJar, deleteJar, getSetting, listJars, renameJar, type JarSummary } from '../lib/db';
+import { AdBanner } from '../lib/ads';
 import { t } from '../lib/i18n';
 import { removeFiles, saveFailed, startCapture } from '../lib/media';
+import { canCreateJar } from '../lib/plan';
+import { usePremium } from '../lib/premium';
 import {
   onThisDay,
   recap,
@@ -25,6 +28,7 @@ export default function Home() {
   const db = useSQLiteContext();
   const chrome = useChrome();
   const styles = useStyles();
+  const { isPremium } = usePremium();
   const [jars, setJars] = useState<JarSummary[] | null>(null);
   const [lite, setLite] = useState<{ rows: MemoryLite[]; now: number }>({ rows: [], now: 0 });
   const [menuFor, setMenuFor] = useState<JarSummary | null>(null);
@@ -44,6 +48,12 @@ export default function Home() {
   }, [db]);
 
   const open = (id: number) => router.push({ pathname: '/jar/[id]', params: { id: String(id) } });
+
+  // Free plan: 3 jars. The 4th opens the paywall (existing jars are never locked).
+  const newJar = () =>
+    canCreateJar(jars?.length ?? 0, isPremium)
+      ? setDialog({ mode: 'new' })
+      : router.push({ pathname: '/paywall', params: { reason: 'jars' } });
 
   async function submitName(name: string) {
     try {
@@ -95,7 +105,7 @@ export default function Home() {
         keyExtractor={(j) => String(j.id)}
         contentContainerStyle={{ padding: 12, flexGrow: 1 }}
         columnWrapperStyle={{ gap: 12 }}
-        ListHeaderComponent={<Rediscover rows={lite.rows} now={lite.now} />}
+        ListHeaderComponent={<Rediscover rows={lite.rows} now={lite.now} premium={isPremium} />}
         ListEmptyComponent={
           <Empty title={t.shelfEmptyTitle}>
             <Text style={styles.hint}>{t.shelfEmptyHint}</Text>
@@ -103,12 +113,7 @@ export default function Home() {
         }
         renderItem={({ item }) =>
           item.id === NEW ? (
-            <Pressable
-              style={styles.jar}
-              onPress={() => setDialog({ mode: 'new' })}
-              accessibilityRole="button"
-              accessibilityLabel={t.newJar}
-            >
+            <Pressable style={styles.jar} onPress={newJar} accessibilityRole="button" accessibilityLabel={t.newJar}>
               <View style={styles.newTile}>
                 <Text style={styles.newPlus}>＋</Text>
               </View>
@@ -133,6 +138,7 @@ export default function Home() {
       />
       <View style={styles.shelfLine} />
       <CaptureBar onLibrary={() => startCapture(false)} onCamera={() => startCapture(true)} />
+      <AdBanner />
 
       <Sheet
         visible={!!menuFor}
@@ -163,28 +169,40 @@ export default function Home() {
 
 const openMemory = (id: number) => router.push({ pathname: '/memory/[id]', params: { id: String(id) } });
 
+const paywall = (reason: 'rediscover' | 'recap') => router.push({ pathname: '/paywall', params: { reason } });
+
 // Brings old memories back to the shelf: yearly recap in season, "on this day", else "remember this?".
-function Rediscover({ rows, now }: { rows: MemoryLite[]; now: number }) {
+// "Remember this?" is free; anniversaries and the recap are Premium (MONETIZATION.md §3).
+function Rediscover({ rows, now, premium }: { rows: MemoryLite[]; now: number; premium: boolean }) {
   const styles = useStyles();
   const season = recapSeasonYear(now);
   const showRecap = season !== null && recap(rows, season).count > 0;
   const exact = onThisDay(rows, now);
   const past = (exact.length ? exact : thisWeekInPastYears(rows, now)).slice(0, 6);
-  const remember = past.length ? null : rememberThis(rows, now);
+  const remember = past.length && premium ? null : rememberThis(rows, now);
   if (!showRecap && !past.length && !remember) return null;
   return (
     <View style={{ gap: 12, marginBottom: 8 }}>
       {showRecap && (
         <Pressable
           style={styles.card}
-          onPress={() => router.push({ pathname: '/recap', params: { year: String(season) } })}
+          onPress={() =>
+            premium ? router.push({ pathname: '/recap', params: { year: String(season) } }) : paywall('recap')
+          }
           accessibilityRole="button"
         >
           <Text style={styles.cardTitle}>{t.recapTitle(season!)}</Text>
           <Text style={styles.cardBody}>{t.recapCardBody}</Text>
         </Pressable>
       )}
-      {past.length > 0 && (
+      {past.length > 0 && !premium && (
+        <Pressable style={styles.card} onPress={() => paywall('rediscover')} accessibilityRole="button">
+          <Text style={styles.cardLabel}>{exact.length ? t.onThisDay : t.thisWeek}</Text>
+          <Text style={styles.cardTitle}>{t.onThisDayLocked(past.length)}</Text>
+          <Text style={[styles.cardBody, { color: styles.link.color }]}>{t.seeWithPremium}</Text>
+        </Pressable>
+      )}
+      {past.length > 0 && premium && (
         <View style={styles.card}>
           <Text style={styles.cardLabel}>{exact.length ? t.onThisDay : t.thisWeek}</Text>
           <View style={styles.pastRow}>
@@ -202,7 +220,11 @@ function Rediscover({ rows, now }: { rows: MemoryLite[]; now: number }) {
         </View>
       )}
       {remember && (
-        <Pressable style={[styles.card, styles.rememberCard]} onPress={() => openMemory(remember.id)} accessibilityRole="button">
+        <Pressable
+          style={[styles.card, styles.rememberCard]}
+          onPress={() => openMemory(remember.id)}
+          accessibilityRole="button"
+        >
           <View style={[styles.miniPrint, { width: 84 }]}>
             <Photo file={remember.cover} style={{ width: '100%', aspectRatio: 1 }} />
           </View>
@@ -225,6 +247,7 @@ const useStyles = makeStyles((c) => ({
   cardLabel: { fontSize: 12, color: c.muted, textTransform: 'uppercase', letterSpacing: 1 },
   cardTitle: { fontSize: 17, fontWeight: '600', color: c.ink },
   cardBody: { fontSize: 14, color: c.muted },
+  link: { color: c.accent },
   pastRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 6 },
   pastItem: { width: 76, gap: 6, alignItems: 'center' },
   pastCaption: { fontSize: 12, color: c.muted },

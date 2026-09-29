@@ -35,7 +35,16 @@ export default function Viewer() {
 
 const styles = StyleSheet.create({
   bg: { flex: 1, backgroundColor: '#000' },
-  top: { position: 'absolute', top: 0, left: 0, right: 0, padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  top: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   share: { color: '#fff', fontSize: 17, padding: 8 },
   close: { color: '#fff', fontSize: 24, padding: 8 },
 });

@@ -5,6 +5,7 @@ import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { deleteJar, getJar, listMemories, renameJar, type Jar as JarRow, type Memory } from '../../lib/db';
 import { useChrome } from '../../lib/theme';
+import { AdBanner } from '../../lib/ads';
 import { t } from '../../lib/i18n';
 import { removeFiles, startCapture } from '../../lib/media';
 import { NameDialog, Sheet } from '../../lib/sheet';
@@ -63,7 +64,12 @@ export default function Jar() {
           ...chrome,
           title: jar.name,
           headerRight: () => (
-            <Pressable onPress={() => setMenu(true)} hitSlop={12} accessibilityRole="button" accessibilityLabel={t.jarOptions}>
+            <Pressable
+              onPress={() => setMenu(true)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={t.jarOptions}
+            >
               <Text style={{ color: c.ink, fontSize: 22, fontWeight: '700' }}>•••</Text>
             </Pressable>
           ),
@@ -93,6 +99,7 @@ export default function Jar() {
         )}
       />
       <CaptureBar onLibrary={() => startCapture(false, id)} onCamera={() => startCapture(true, id)} />
+      <AdBanner />
       <Sheet
         visible={menu}
         title={jar.name}

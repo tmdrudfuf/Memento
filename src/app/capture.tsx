@@ -6,6 +6,8 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput,
 import { createJar, createMemory, listJars, type JarSummary } from '../lib/db';
 import { t } from '../lib/i18n';
 import { removeFiles, saveFailed } from '../lib/media';
+import { canCreateJar } from '../lib/plan';
+import { usePremium } from '../lib/premium';
 import { makeStyles, useChrome } from '../lib/theme';
 import { Photo, useColors } from '../lib/ui';
 
@@ -20,6 +22,7 @@ export default function Capture() {
   const [naming, setNaming] = useState(false);
   const [name, setName] = useState('');
   const saved = useRef(false);
+  const { isPremium } = usePremium();
 
   useEffect(() => {
     listJars(db).then((all) => {
@@ -85,7 +88,15 @@ export default function Capture() {
             </Pressable>
           ))}
           {!naming && (
-            <Pressable onPress={() => setNaming(true)} style={[styles.chip, styles.chipNew]} accessibilityRole="button">
+            <Pressable
+              onPress={() =>
+                canCreateJar(jars.length, isPremium)
+                  ? setNaming(true)
+                  : router.push({ pathname: '/paywall', params: { reason: 'jars' } })
+              }
+              style={[styles.chip, styles.chipNew]}
+              accessibilityRole="button"
+            >
               <Text style={styles.chipText}>{t.newJarChip}</Text>
             </Pressable>
           )}

@@ -3,19 +3,22 @@ import { router, Stack, useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState, type ReactNode } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useAds } from '../lib/ads';
+import { config } from '../lib/config';
 import { deleteAllData, getSetting, setSetting, stats } from '../lib/db';
 import { removeAllMedia, storageUsed } from '../lib/media';
 import { t } from '../lib/i18n';
+import { QA, usePremium } from '../lib/premium';
 import { disableWeeklyReminder, enableWeeklyReminder } from '../lib/reminder';
 import { makeStyles, useChrome } from '../lib/theme';
 import { useColors } from '../lib/ui';
 
-const SITE = 'https://tmdrudfuf.github.io/Memento/';
-const PRIVACY = `${SITE}privacy.html`;
-const SUPPORT = 'https://github.com/tmdrudfuf/Memento/issues';
+const { site: SITE, privacy: PRIVACY, support: SUPPORT } = config.links;
 
 const formatBytes = (b: number) =>
-  b < 1024 * 1024 ? `${Math.max(1, Math.round(b / 1024))} KB` : `${(b / 1024 / 1024).toFixed(b < 100 * 1024 * 1024 ? 1 : 0)} MB`;
+  b < 1024 * 1024
+    ? `${Math.max(1, Math.round(b / 1024))} KB`
+    : `${(b / 1024 / 1024).toFixed(b < 100 * 1024 * 1024 ? 1 : 0)} MB`;
 
 export default function Settings() {
   const db = useSQLiteContext();
@@ -25,6 +28,8 @@ export default function Settings() {
   const [bytes, setBytes] = useState(0);
   const [reminder, setReminder] = useState(false);
   const c = useColors();
+  const premium = usePremium();
+  const ads = useAds();
 
   const load = useCallback(() => {
     stats(db).then(setS);
@@ -78,6 +83,36 @@ export default function Settings() {
   return (
     <ScrollView contentContainerStyle={styles.wrap}>
       <Stack.Screen options={chrome} />
+      <Section title={t.premium}>
+        <Row label={premium.isPremium ? t.planPremium : t.planFree} value={premium.isPremium ? '✓' : undefined} />
+        {!premium.isPremium && (
+          <Row
+            label={t.upgrade}
+            onPress={() => router.push({ pathname: '/paywall', params: { reason: 'settings' } })}
+          />
+        )}
+        {premium.storeReady && (
+          <Row
+            label={t.restore}
+            onPress={() =>
+              premium
+                .restore()
+                .then((ok) => Alert.alert(ok ? t.restored : t.nothingToRestore))
+                .catch(() => Alert.alert(t.purchaseFailed, t.tryAgainBody))
+            }
+          />
+        )}
+        {ads.privacyOptionsRequired && !premium.isPremium && (
+          <Row label={t.adPrivacy} onPress={ads.showPrivacyOptions} />
+        )}
+        {QA && (
+          <View style={styles.row}>
+            <Text style={styles.label}>{t.devPremium}</Text>
+            <Switch value={premium.devOverride} onValueChange={premium.setDevOverride} />
+          </View>
+        )}
+      </Section>
+
       <Section title={t.yourCollection}>
         <Row label={t.memoriesLabel} value={String(s.memories)} />
         <Row label={t.jarsLabel} value={String(s.jars)} />

@@ -98,7 +98,11 @@ export function CoverStack({ covers, size = 120 }: { covers: string[]; size?: nu
             {
               width: size,
               height: size,
-              transform: [{ translateX: fan[i].translateX }, { translateY: fan[i].translateY }, { rotate: fan[i].rotate }],
+              transform: [
+                { translateX: fan[i].translateX },
+                { translateY: fan[i].translateY },
+                { rotate: fan[i].rotate },
+              ],
             },
           ]}
         >

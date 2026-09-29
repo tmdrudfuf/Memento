@@ -22,6 +22,8 @@
     "expo-video": "~57.0.5",
     "react": "19.2.3",
     "react-native": "0.86.3",
+    "react-native-google-mobile-ads": "^17.2.0",
+    "react-native-purchases": "^10.10.2",
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0"
   },
@@ -39,7 +41,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"test/*.test.ts\"",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" plugins/*.js"
   },
   "private": true
 }
