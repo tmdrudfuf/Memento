@@ -45,7 +45,14 @@ Nothing else is asked at capture. Title, note, date and related media all live o
 - Opening a Memory increments `openCount` / `lastOpenedAt`. This measures H1 and is not surfaced as gamification.
 - "On this day" and "Remember this?" prompts are deferred until there is data worth rediscovering (masterplan §36).
 
-## Visual direction
+## Visual direction (updated 2026-09-29: boards, ko: 추억 보드)
+
+The owner chose a **memory board** over a jar: the fanned prints already read as a pinboard. Current design:
+- **Home:** a wall of small wood-framed cork boards, each with its latest prints pinned by colored push pins. "New board" is an empty dashed board.
+- **Board screen:** a full cork background (dark felt in dark mode) with memories as pinned polaroids.
+- **Wording:** EN "board"; KO 추억 보드, with 붙이기 (pin) instead of 담기. Internally the code and DB still say `jar`.
+
+### Original direction (superseded)
 
 The choice is a **shelf of polaroid stacks**, not glass jars. Reasons:
 

@@ -128,7 +128,7 @@ QA builds: `EXPO_PUBLIC_QA=1` before the Gradle build shows a "Premium (debug bu
   >
   > Memento keeps only the ones you choose. Pick one photo that brings a moment back: the ramen you had in Tokyo, a train ticket, the dinner table. That photo becomes the cover of a memory. Inside, keep the related photos, a short video, the date and a line of text.
   >
-  > Memories collect in Jars: "Japan 2026", "Us", "Family", "College". Over time your shelf becomes a collection of your life.
+  > Pin memories to boards: "Japan 2026", "Us", "Family", "College". Over time your wall of boards becomes a collection of your life.
   >
   > • Save a memory in 3 taps. No typing required.
   > • Add details later, whenever you like.

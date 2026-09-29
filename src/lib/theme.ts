@@ -11,6 +11,9 @@ const light = {
   frame: '#FFFFFF', // polaroid border: stays a real print in both themes
   frameInk: '#2B2622', // caption on the print
   scrim: 'rgba(0,0,0,0.35)',
+  frameWood: '#B89068', // board frame
+  frameWoodDark: '#9C7550',
+  board: 'cork' as 'cork' | 'felt',
 };
 
 const dark: typeof light = {
@@ -24,9 +27,16 @@ const dark: typeof light = {
   frame: '#EFE9E1',
   frameInk: '#2B2622',
   scrim: 'rgba(0,0,0,0.55)',
+  frameWood: '#5A4A3C',
+  frameWoodDark: '#453829',
+  board: 'felt',
 };
 
 export type Colors = typeof light;
+
+// Push-pin heads; picked per memory so a board looks hand-pinned but stays stable.
+export const PINS = ['#D9483B', '#E8B53A', '#3D7BD9', '#3FA46A', '#D96BA8'];
+export const pinColor = (id: number) => PINS[(id * 7) % PINS.length];
 
 export function useColors(): Colors {
   return useColorScheme() === 'dark' ? dark : light;

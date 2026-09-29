@@ -4,7 +4,7 @@
 
 (Working name in the original brief: "Photo Catcher".)
 
-Pick one symbolic photo — a meal, a ticket, a view — and it becomes the cover of a Memory that holds related photos, videos and a note. Memories collect in Jars. Capture → Collect → Remember.
+Pick one symbolic photo — a meal, a ticket, a view — and it becomes the cover of a Memory that holds related photos, videos and a note. Memories are pinned to boards (추억 보드). Capture → Collect → Remember.
 
 - Product reasoning: [PRODUCT_ASSESSMENT.md](PRODUCT_ASSESSMENT.md)
 - Screens and capture flow: [UX_FLOW.md](UX_FLOW.md)

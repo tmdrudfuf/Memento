@@ -9,7 +9,7 @@ import { AdBanner } from '../../lib/ads';
 import { t } from '../../lib/i18n';
 import { removeFiles, startCapture } from '../../lib/media';
 import { NameDialog, Sheet } from '../../lib/sheet';
-import { CaptureBar, Empty, formatDate, Polaroid, useColors } from '../../lib/ui';
+import { BoardSurface, CaptureBar, Empty, formatDate, Polaroid, useColors } from '../../lib/ui';
 
 export default function Jar() {
   const db = useSQLiteContext();
@@ -75,29 +75,31 @@ export default function Jar() {
           ),
         }}
       />
-      <FlatList
-        data={memories}
-        numColumns={2}
-        keyExtractor={(m) => String(m.id)}
-        contentContainerStyle={{ padding: 16, gap: 22, flexGrow: 1 }}
-        columnWrapperStyle={{ gap: 18 }}
-        ListEmptyComponent={
-          <Empty title={t.jarEmptyTitle}>
-            <Text style={{ color: c.muted, textAlign: 'center' }}>{t.jarEmptyHint}</Text>
-          </Empty>
-        }
-        renderItem={({ item }) => (
-          <View style={{ flex: 1, maxWidth: '50%' }}>
-            <Polaroid
-              id={item.id}
-              file={item.cover}
-              caption={item.title || formatDate(item.memoryDate)}
-              settle={settle === String(item.id)}
-              onPress={() => router.push({ pathname: '/memory/[id]', params: { id: String(item.id) } })}
-            />
-          </View>
-        )}
-      />
+      <BoardSurface style={{ flex: 1 }}>
+        <FlatList
+          data={memories}
+          numColumns={2}
+          keyExtractor={(m) => String(m.id)}
+          contentContainerStyle={{ padding: 18, paddingTop: 26, gap: 30, flexGrow: 1 }}
+          columnWrapperStyle={{ gap: 18 }}
+          ListEmptyComponent={
+            <Empty title={t.jarEmptyTitle}>
+              <Text style={{ color: c.muted, textAlign: 'center' }}>{t.jarEmptyHint}</Text>
+            </Empty>
+          }
+          renderItem={({ item }) => (
+            <View style={{ flex: 1, maxWidth: '50%' }}>
+              <Polaroid
+                id={item.id}
+                file={item.cover}
+                caption={item.title || formatDate(item.memoryDate)}
+                settle={settle === String(item.id)}
+                onPress={() => router.push({ pathname: '/memory/[id]', params: { id: String(item.id) } })}
+              />
+            </View>
+          )}
+        />
+      </BoardSurface>
       <CaptureBar onLibrary={() => startCapture(false, id)} onCamera={() => startCapture(true, id)} />
       <AdBanner />
       <Sheet

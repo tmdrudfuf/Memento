@@ -9,7 +9,7 @@ import { removeFiles, saveFailed } from '../lib/media';
 import { canCreateJar } from '../lib/plan';
 import { usePremium } from '../lib/premium';
 import { makeStyles, useChrome } from '../lib/theme';
-import { Photo, useColors } from '../lib/ui';
+import { Photo, Pin, useColors } from '../lib/ui';
 
 // Photo → choose Jar → Done. Tapping a jar IS the save; nothing else is asked.
 export default function Capture() {
@@ -73,6 +73,7 @@ export default function Capture() {
       <ScrollView contentContainerStyle={styles.wrap} keyboardShouldPersistTaps="handled">
         <View style={styles.frame}>
           <Photo file={p.file} style={{ aspectRatio: 1, width: '100%' }} />
+          <Pin id={p.file.length} size={18} />
         </View>
         <Text style={styles.label}>{jars.length ? t.tapJar : t.nameFirstJar}</Text>
         <View style={styles.chips}>

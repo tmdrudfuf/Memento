@@ -12,7 +12,7 @@ WHITE = (255, 255, 255, 255)
 S = 4  # supersampling
 
 
-def polaroid(w, photo=True, mono=False):
+def polaroid(w, photo=True, mono=False, pin=False):
     h = int(w * 1.18)
     im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
@@ -31,6 +31,13 @@ def polaroid(w, photo=True, mono=False):
         d.rectangle([x0, cy, x1, y1], fill=INK)
     else:
         d.rectangle(box, fill=(214, 204, 188, 255))
+    if pin and not mono:  # red push pin through the top edge
+        r = int(w * 0.075)
+        cx, cy = w // 2, int(m * 0.9)
+        d.ellipse([cx - r + r // 5, cy - r + r // 3, cx + r + r // 5, cy + r + r // 3], fill=(0, 0, 0, 70))  # shadow
+        d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=(217, 72, 59, 255))
+        h = r // 3
+        d.ellipse([cx - r // 2, cy - r // 2, cx - r // 2 + h * 2, cy - r // 2 + h * 2], fill=(255, 255, 255, 140))
     return im
 
 
@@ -39,7 +46,7 @@ def mark(size, mono=False, scale=0.62):
     canvas = Image.new("RGBA", (big, big), (0, 0, 0, 0))
     w = int(big * scale * 0.78)
     back = polaroid(w, photo=False, mono=mono).rotate(12, expand=True, resample=Image.BICUBIC)
-    front = polaroid(w, mono=mono).rotate(-5, expand=True, resample=Image.BICUBIC)
+    front = polaroid(w, mono=mono, pin=True).rotate(-5, expand=True, resample=Image.BICUBIC)
     for layer, dx, dy in ((back, 0.06, -0.03), (front, -0.04, 0.03)):
         x = (big - layer.width) // 2 + int(big * dx)
         y = (big - layer.height) // 2 + int(big * dy)

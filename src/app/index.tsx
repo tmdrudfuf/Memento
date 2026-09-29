@@ -20,7 +20,7 @@ import {
 } from '../lib/rediscover';
 import { NameDialog, Sheet } from '../lib/sheet';
 import { makeStyles, useChrome } from '../lib/theme';
-import { CaptureBar, CoverStack, Empty, formatDate, Photo } from '../lib/ui';
+import { BoardThumb, CaptureBar, Empty, formatDate, Photo, Pin } from '../lib/ui';
 
 const NEW = -1; // sentinel item for the "New jar" tile
 
@@ -127,7 +127,7 @@ export default function Home() {
               accessibilityRole="button"
               accessibilityLabel={t.jarA11y(item.name, item.count)}
             >
-              <CoverStack covers={item.covers} />
+              <BoardThumb covers={item.covers} />
               <Text style={styles.jarName} numberOfLines={1}>
                 {item.name}
               </Text>
@@ -210,6 +210,7 @@ function Rediscover({ rows, now, premium }: { rows: MemoryLite[]; now: number; p
               <Pressable key={m.id} style={styles.pastItem} onPress={() => openMemory(m.id)} accessibilityRole="button">
                 <View style={styles.miniPrint}>
                   <Photo file={m.cover} style={{ width: '100%', aspectRatio: 1 }} />
+                  <Pin id={m.id} size={10} />
                 </View>
                 <Text style={styles.pastCaption} numberOfLines={1}>
                   {t.yearsAgo(yearsAgo(m.memoryDate, now))}
@@ -227,6 +228,7 @@ function Rediscover({ rows, now, premium }: { rows: MemoryLite[]; now: number; p
         >
           <View style={[styles.miniPrint, { width: 84 }]}>
             <Photo file={remember.cover} style={{ width: '100%', aspectRatio: 1 }} />
+            <Pin id={remember.id} size={11} />
           </View>
           <View style={{ flex: 1, gap: 4 }}>
             <Text style={styles.cardLabel}>{t.rememberThis}</Text>
@@ -271,9 +273,8 @@ const useStyles = makeStyles((c) => ({
   shelfLine: { height: 1, backgroundColor: c.line },
   gear: { fontSize: 24, color: c.ink },
   newTile: {
-    width: 120,
-    height: 120,
-    marginVertical: 10,
+    width: 156,
+    height: 125,
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: c.line,

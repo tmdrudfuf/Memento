@@ -7,7 +7,7 @@ import { t } from '../lib/i18n';
 import { usePremium } from '../lib/premium';
 import { recap, recapYears, type MemoryLite, type Recap as RecapData } from '../lib/rediscover';
 import { makeStyles, useChrome } from '../lib/theme';
-import { Button, Empty, Photo, tilt } from '../lib/ui';
+import { Button, Empty, Photo, Pin, tilt } from '../lib/ui';
 
 const monthName = (m: number) => new Date(2000, m, 1).toLocaleDateString(undefined, { month: 'long' });
 
@@ -94,6 +94,7 @@ export default function Recap() {
                         accessibilityLabel={t.openMemory(x.title ?? monthName(m))}
                       >
                         <Photo file={x.cover} style={{ width: '100%', aspectRatio: 1 }} />
+                        <Pin id={x.id} size={11} />
                       </Pressable>
                     ))}
                 </View>
