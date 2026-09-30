@@ -126,7 +126,7 @@ Code is done and verified with Google test ads plus a QA Premium switch. Real mo
    - Create offering `default` with packages Monthly, Annual and Lifetime.
    - Remove Lifetime from the offering whenever Founder's sales should end. No app update is needed.
    - Paste the public SDK key (`goog_…`) into `src/lib/config.ts`.
-4. **AdMob** (free):
+4. **AdMob** (free) — **done 2026-09-29**: app `ca-app-pub-3024928824650244~6018206834`, banner unit `.../9722567991`, GDPR message "Memento GDPR" published (Do-not-consent on). Payment profile done. Still to do after the Play listing is live: link the app to the store listing, and host `app-ads.txt`.
    - Create app Memento (Android) and one banner ad unit.
    - Replace the Google test app ID in `app.json` (plugin + top-level `react-native-google-mobile-ads`) and put the unit ID in `src/lib/config.ts`.
    - Create the GDPR consent message (Privacy & messaging).
