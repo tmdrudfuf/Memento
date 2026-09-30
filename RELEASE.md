@@ -126,6 +126,21 @@ Code is done and verified with Google test ads plus a QA Premium switch. Real mo
 
 QA builds: `EXPO_PUBLIC_QA=1` before the Gradle build shows a "Premium (debug build only)" switch. Store and CI builds never set it.
 
+## Google Drive backup setup (owner, free, ~10 min)
+
+The code is done: sign-in, resumable upload to the `drive.appdata` folder, weekly Wi-Fi auto backup, restore, and disconnect-and-delete. It needs a Google Cloud OAuth client, which must be created under your Google account.
+
+1. **Create the project.** https://console.cloud.google.com → New project **Memento**.
+2. **Enable the API.** APIs & Services → Library → **Google Drive API** → Enable.
+3. **Set up the consent screen.** OAuth consent screen (Google Auth Platform) → **External**. App name: Memento. Support email: yours.
+   - Add the scope `.../auth/drive.appdata`. It is non-sensitive, so verification stays simple.
+   - Under **Test users**, add your Gmail and your testers until the app is published.
+4. **Create the Android client.** Credentials → Create OAuth client → **Android**. Package `com.tmdrudfuf.memento`, SHA-1 `17:0F:C4:A3:F2:1C:F6:33:39:A0:59:31:E6:33:B2:00:C8:FC:97:07` (upload key).
+   - Create a second Android client for QA/debug builds with SHA-1 `5E:8F:16:06:2E:A3:CD:2C:4A:0D:54:78:76:BA:A6:F3:8C:AB:F6:25`.
+   - After Play Console setup, add a third with the **Play App Signing** SHA-1 (Play Console → Test and release → App integrity).
+5. **Create the Web client.** Credentials → Create OAuth client → **Web application** → copy its Client ID into `src/lib/config.ts` → `google.webClientId`.
+6. **(iOS, later) Create the iOS client.** Bundle `com.tmdrudfuf.memento`; put its reversed client ID in `app.json` → google-signin → `iosUrlScheme`.
+
 ## Upload key (Android)
 
 - Upload key: `%USERPROFILE%\.memento-keys\upload.jks` plus `upload.properties` (passwords). It is also in GitHub Secrets. **Back up this folder somewhere safe** (e.g. a password manager).

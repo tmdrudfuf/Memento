@@ -9,10 +9,10 @@ const mediaDir = () => new Directory(Paths.document, 'media');
 export class NotABackupError extends Error {}
 
 /**
- * Builds the backup in the cache folder and opens the share sheet to save it. Collections over
- * ~3.5 GB become several parts (zip can't exceed 4 GB here); each part is shared in turn.
+ * Builds the backup zip(s) in the cache folder. Collections over ~3.5 GB become several parts
+ * (zip can't exceed 4 GB here). Used by the manual export and by Google Drive backup.
  */
-export async function exportBackup(db: DB, onProgress?: (done: number, total: number) => void) {
+export async function buildBackup(db: DB, onProgress?: (done: number, total: number) => void): Promise<File[]> {
   const data = await dumpAll(db);
   const names = [...new Set([...data.memories.map((m) => m.cover), ...data.media.map((m) => m.file)])];
   const files = names.map((name) => new File(mediaDir(), name)).filter((f) => f.exists);
@@ -25,6 +25,7 @@ export async function exportBackup(db: DB, onProgress?: (done: number, total: nu
   const d = new Date();
   const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   let doneBefore = 0;
+  const outs: File[] = [];
   for (let p = 0; p < parts.length; p++) {
     const suffix = parts.length > 1 ? `-part${p + 1}of${parts.length}` : '';
     const out = new File(Paths.cache, `Memento-backup-${stamp}${suffix}.zip`);
@@ -61,21 +62,33 @@ export async function exportBackup(db: DB, onProgress?: (done: number, total: nu
       w.close();
     }
     doneBefore += parts[p].length;
-    await Sharing.shareAsync(out.uri, { mimeType: 'application/zip', dialogTitle: out.name });
+    outs.push(out);
   }
-  return parts.length;
+  return outs;
 }
 
-/** Lets the user pick a backup .zip and adds its jars and memories to this phone. */
+/** Manual backup: builds the zip(s) and hands each one to the share sheet. Returns the part count. */
+export async function exportBackup(db: DB, onProgress?: (done: number, total: number) => void) {
+  const outs = await buildBackup(db, onProgress);
+  for (const out of outs) await Sharing.shareAsync(out.uri, { mimeType: 'application/zip', dialogTitle: out.name });
+  return outs.length;
+}
+
+/** Lets the user pick a backup .zip and adds its boards and memories to this phone. */
 export async function importBackup(db: DB): Promise<{ jars: number; memories: number } | null> {
   const picked = await File.pickFileAsync({
     mimeTypes: ['application/zip', 'application/x-zip-compressed', 'application/octet-stream'],
   });
   if (picked.canceled || !picked.result) return null;
+  return importBackupFile(db, picked.result);
+}
+
+/** Restores one backup zip (a picked file or a part downloaded from Google Drive). */
+export async function importBackupFile(db: DB, file: File): Promise<{ jars: number; memories: number }> {
   const dir = mediaDir();
   if (!dir.exists) dir.create({ intermediates: true });
   const extracted: File[] = [];
-  const r = picked.result.open(FileMode.ReadOnly);
+  const r = file.open(FileMode.ReadOnly);
   let json: unknown;
   try {
     json = await readArchive(

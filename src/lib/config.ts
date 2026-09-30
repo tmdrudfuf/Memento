@@ -10,6 +10,12 @@ export const config = {
     androidBanner: '', // AdMob → Apps → Memento (Android) → Ad units → banner (ca-app-pub-.../...)
     iosBanner: '',
   },
+  google: {
+    // Google Cloud → APIs & Services → Credentials → OAuth client (Web application) → Client ID.
+    // Android also needs an "Android" OAuth client with package com.tmdrudfuf.memento + signing SHA-1s
+    // (no value goes here for that one). iOS: set app.json google-signin iosUrlScheme too.
+    webClientId: '',
+  },
   links: {
     site: 'https://tmdrudfuf.github.io/Memento/',
     privacy: 'https://tmdrudfuf.github.io/Memento/privacy.html',

@@ -7,4 +7,17 @@ export function canCreateJar(jarCount: number, isPremium: boolean) {
   return isPremium || jarCount < FREE_JAR_LIMIT;
 }
 
-export type PaywallReason = 'jars' | 'rediscover' | 'recap' | 'settings';
+export type PaywallReason = 'jars' | 'rediscover' | 'recap' | 'backup' | 'settings';
+
+export const AUTO_BACKUP_EVERY = 7 * 86_400_000;
+
+/** Automatic Google Drive backup: Premium, connected, at most weekly, only on Wi-Fi. */
+export function shouldAutoBackup(s: {
+  premium: boolean;
+  connected: boolean;
+  last: number;
+  now: number;
+  wifi: boolean;
+}) {
+  return s.premium && s.connected && s.wifi && s.now - s.last >= AUTO_BACKUP_EVERY;
+}

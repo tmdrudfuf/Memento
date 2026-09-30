@@ -3,6 +3,7 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { Text, useColorScheme, View } from 'react-native';
 import { AdsProvider } from '../lib/ads';
+import { AutoBackup } from '../lib/autobackup';
 import { migrate } from '../lib/db';
 import { t } from '../lib/i18n';
 import { PremiumProvider } from '../lib/premium';
@@ -29,6 +30,7 @@ export default function RootLayout() {
         <AdsProvider>
           <ThemeProvider value={theme}>
             <StatusBar style="auto" />
+            <AutoBackup />
             <Stack screenOptions={{ headerShadowVisible: false }}>
               <Stack.Screen name="index" options={{ title: 'Memento' }} />
               <Stack.Screen name="jar/[id]" options={{ title: '' }} />

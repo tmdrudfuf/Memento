@@ -14,6 +14,7 @@ const COPY: Record<PaywallReason, { title: string; body: string }> = {
   jars: { title: t.paywallJarsTitle, body: t.paywallJarsBody },
   rediscover: { title: t.paywallRediscoverTitle, body: t.paywallRediscoverBody },
   recap: { title: t.paywallRecapTitle, body: t.paywallRecapBody },
+  backup: { title: t.paywallBackupTitle, body: t.paywallBackupBody },
   settings: { title: t.paywallGenericTitle, body: t.paywallGenericBody },
 };
 
@@ -79,7 +80,7 @@ export default function Paywall() {
       <Text style={styles.body}>{copy.body}</Text>
 
       <View style={styles.benefits}>
-        {[t.benefitJars, t.benefitAds, t.benefitRediscover, t.benefitRecap].map((b) => (
+        {[t.benefitJars, t.benefitAds, t.benefitBackup, t.benefitRediscover, t.benefitRecap].map((b) => (
           <Text key={b} style={styles.benefit}>
             ✓ {b}
           </Text>

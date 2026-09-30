@@ -18,12 +18,20 @@ import { useAds } from '../lib/ads';
 import { exportBackup, importBackup, NotABackupError } from '../lib/backup';
 import { config } from '../lib/config';
 import { deleteAllData, getSetting, setSetting, stats } from '../lib/db';
+import {
+  backupToDrive,
+  connectDrive,
+  deleteDriveBackups,
+  disconnectDrive,
+  driveAvailable,
+  restoreFromDrive,
+} from '../lib/drive';
 import { removeAllMedia, storageUsed } from '../lib/media';
 import { t } from '../lib/i18n';
 import { QA, usePremium } from '../lib/premium';
 import { disableWeeklyReminder, enableWeeklyReminder } from '../lib/reminder';
 import { makeStyles, useChrome } from '../lib/theme';
-import { useColors } from '../lib/ui';
+import { formatDate, useColors } from '../lib/ui';
 
 const { site: SITE, privacy: PRIVACY, support: SUPPORT } = config.links;
 
@@ -44,6 +52,92 @@ export default function Settings() {
   const c = useColors();
   const premium = usePremium();
   const [busy, setBusy] = useState<string | null>(null);
+  const [drive, setDrive] = useState<{ email: string; last: number; failed: boolean } | null>(null);
+
+  const loadDrive = useCallback(async () => {
+    const [email, last, err] = await Promise.all([
+      getSetting(db, 'driveEmail'),
+      getSetting(db, 'lastDriveBackup'),
+      getSetting(db, 'driveLastError'),
+    ]);
+    setDrive(email ? { email, last: Number(last) || 0, failed: !!err && Number(err) > (Number(last) || 0) } : null);
+  }, [db]);
+
+  async function driveBackupNow() {
+    setBusy(t.preparingBackup(0, 0));
+    try {
+      await backupToDrive(db, (phase, done, total) =>
+        setBusy(
+          phase === 'prepare' ? t.preparingBackup(done, total) : t.driveUploading(Math.round((100 * done) / total)),
+        ),
+      );
+      await setSetting(db, 'lastDriveBackup', String(Date.now()));
+      await setSetting(db, 'driveLastError', '');
+      Alert.alert(t.driveDone);
+    } catch (e) {
+      console.warn(e);
+      Alert.alert(t.driveFailed, t.tryAgainBody);
+    } finally {
+      setBusy(null);
+      loadDrive();
+    }
+  }
+
+  async function driveConnect() {
+    if (!premium.isPremium) return router.push({ pathname: '/paywall', params: { reason: 'backup' } });
+    if (!driveAvailable()) return Alert.alert(t.driveNotSetUp);
+    try {
+      const user = await connectDrive();
+      if (!user) return;
+      await setSetting(db, 'driveEmail', user.email);
+      await loadDrive();
+      await driveBackupNow(); // first backup right away
+    } catch (e) {
+      console.warn(e);
+      Alert.alert(t.driveFailed, t.tryAgainBody);
+    }
+  }
+
+  function driveRestore() {
+    Alert.alert(t.restoreTitle, t.restoreBody, [
+      { text: t.cancel, style: 'cancel' },
+      {
+        text: t.continue,
+        onPress: async () => {
+          setBusy(t.restoring);
+          try {
+            const r = await restoreFromDrive(db);
+            if (!r) Alert.alert(t.driveNoBackup);
+            else Alert.alert(r.memories || r.jars ? t.restoreDone(r.jars, r.memories) : t.restoreNothing);
+            load();
+          } catch (e) {
+            console.warn(e);
+            Alert.alert(t.backupFailed, t.tryAgainBody);
+          } finally {
+            setBusy(null);
+          }
+        },
+      },
+    ]);
+  }
+
+  function driveDisconnect() {
+    const done = async (deleteBackups: boolean) => {
+      try {
+        if (deleteBackups) await deleteDriveBackups();
+        await disconnectDrive();
+      } catch (e) {
+        console.warn(e);
+      }
+      await setSetting(db, 'driveEmail', '');
+      loadDrive();
+    };
+    Alert.alert(t.driveDisconnectTitle, t.driveDisconnectBody, [
+      { text: t.cancel, style: 'cancel' },
+      { text: t.driveKeep, onPress: () => done(false) },
+      { text: t.driveDeleteToo, style: 'destructive', onPress: () => done(true) },
+    ]);
+  }
 
   async function doExport() {
     setBusy(t.preparingBackup(0, 0));
@@ -85,7 +179,8 @@ export default function Settings() {
     stats(db).then(setS);
     setBytes(storageUsed());
     getSetting(db, 'weeklyReminder').then((v) => setReminder(v === '1'));
-  }, [db]);
+    loadDrive();
+  }, [db, loadDrive]);
 
   async function toggleReminder(on: boolean) {
     setReminder(on);
@@ -177,6 +272,21 @@ export default function Settings() {
         <Row label={t.revisited} value={String(s.revisited)} />
         <Row label={t.storageUsed} value={formatBytes(bytes)} />
         <Row label={t.yearlyRecap} onPress={() => router.push('/recap')} last />
+      </Section>
+
+      <Section title={t.driveBackup}>
+        <Text style={styles.note}>{drive?.failed ? t.driveLastFailed : t.driveNote}</Text>
+        {drive && premium.isPremium ? (
+          <>
+            <Row label={t.driveConnected(drive.email)} />
+            <Row label={t.driveBackupNow} value={drive.last ? undefined : t.driveNever} onPress={driveBackupNow} />
+            {drive.last ? <Row label={t.driveLast(formatDate(drive.last))} /> : null}
+            <Row label={t.driveRestore} onPress={driveRestore} />
+            <Row label={t.driveDisconnect} destructive onPress={driveDisconnect} last />
+          </>
+        ) : (
+          <Row label={premium.isPremium ? t.driveConnect : t.drivePremium} onPress={driveConnect} last />
+        )}
       </Section>
 
       <Section title={t.backup}>

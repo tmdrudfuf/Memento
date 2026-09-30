@@ -41,8 +41,12 @@ Re-check if cloud backup, sync or shared boards are added later: those change th
 | App interactions (ad impressions/clicks) | Yes | Yes (Google AdMob) | No (Free plan) | Advertising, Analytics | AdMob |
 | Crash logs / Diagnostics | Yes | Yes (Google AdMob) | No | Analytics, Fraud prevention | AdMob |
 | Purchase history | Yes | No (RevenueCat is a service provider) | Only if the user buys | App functionality | RevenueCat + Google Play |
+| Photos and videos | Yes (only if the user turns on Drive backup) | No | **Yes, optional** | App functionality (backup to the user's own Google Drive) | Google Drive API |
+| Email address | Yes (Google sign-in for Drive backup; stored on device only) | No | **Yes, optional** | App functionality, Account management | Google Sign-In |
 
-**Not collected:** photos, videos, notes, names, email, contacts, precise location, messages, files. Memories are processed only on the device, which under Play's definition is not "collection".
+Photos, videos and notes are otherwise processed only on the device. Drive backups go to the user's own Drive app folder and the developer has no access. Declaring them as collected (optional) is the conservative choice.
+
+**Not collected:** names, contacts, precise location, messages, other files.
 
 ## App content → Financial features / Health / News / Government / COVID
 None / None / No / No / No.
