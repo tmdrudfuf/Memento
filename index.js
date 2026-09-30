@@ -7,5 +7,5 @@ if (Platform.OS === 'android') {
   registerWidgetTaskHandler(widgetTaskHandler);
 }
 
-// Must be imported last so the handler above is registered before the app renders.
+// Order doesn't matter: imports are hoisted, and the headless task only needs registering at load.
 import 'expo-router/entry';

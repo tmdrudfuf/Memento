@@ -80,13 +80,13 @@
 | Force-stop + relaunch | ✅ intact |
 | Reinstall over existing install (Android update path) | ✅ jars, memories, images intact |
 
-Build it yourself: `npx expo prebuild -p android` → `cd android` → `./gradlew assembleRelease`. The local APK is signed with the **debug** key, so it is for sideloading and testing only. Store builds use the EAS-managed keystore (already created on Expo's servers).
+Build it yourself: `npx expo prebuild -p android` → `cd android` → `./gradlew assembleRelease`. The local APK is signed with the **debug** key, so it is for sideloading and testing only. Store builds are signed with the upload key in GitHub Actions (see Upload key below).
 
 **Not yet verified:** iOS (no Mac, no iPhone here), a real Android phone, the iOS compact date picker, iCloud-only assets (`shouldDownloadFromNetwork`), and survival across an app *update* (needs two store/EAS builds).
 
 ## Owner device test
 
-**Android phone (easiest):** install the APK from https://github.com/tmdrudfuf/Memento/releases/tag/v1.0.0
+**Android phone (easiest):** install the newest APK from https://github.com/tmdrudfuf/Memento/releases/latest
 
 **iPhone (Expo Go):** sign in to Expo Go with the same Expo account as this PC (`tmdrudfuf`). iOS requires this. Then follow these steps:
 
