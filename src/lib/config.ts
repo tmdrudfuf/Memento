@@ -7,7 +7,7 @@ export const config = {
     entitlement: 'premium', // one entitlement unlocked by monthly, yearly and Founder's Lifetime
   },
   admob: {
-    androidBanner: '', // AdMob → Apps → Memento (Android) → Ad units → banner (ca-app-pub-.../...)
+    androidBanner: 'ca-app-pub-3024928824650244/9722567991', // AdMob → Apps → Memento (Android) → Ad units → banner (ca-app-pub-.../...)
     iosBanner: '',
   },
   google: {

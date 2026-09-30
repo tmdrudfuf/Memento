@@ -67,7 +67,8 @@ export function AdBanner() {
   const ads = load();
   if (!ads || isPremium || status === 'off') return null;
   const real = Platform.OS === 'ios' ? config.admob.iosBanner : config.admob.androidBanner;
-  const unitId = __DEV__ || !real ? ads.TestIds.ADAPTIVE_BANNER : real;
+  // Test ads in dev and QA builds: tapping your own live ads can get the AdMob account banned.
+  const unitId = __DEV__ || process.env.EXPO_PUBLIC_QA === '1' || !real ? ads.TestIds.ADAPTIVE_BANNER : real;
   const { BannerAd, BannerAdSize } = ads;
   return (
     // Gap above keeps the ad clear of the capture buttons.
