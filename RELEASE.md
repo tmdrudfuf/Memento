@@ -139,6 +139,8 @@ QA builds: `EXPO_PUBLIC_QA=1` before the Gradle build shows a "Premium (debug bu
 
 ## Google Drive backup setup (owner, free, ~10 min)
 
+**Status (2026-09-29): steps 1–5 done** in Cloud project `memento-510208` (Testing mode, test user tmdrudfuf@gmail.com). Remaining: the Play App Signing client (step 4) and publishing the consent screen before launch.
+
 The code is done: sign-in, resumable upload to the `drive.appdata` folder, weekly Wi-Fi auto backup, restore, and disconnect-and-delete. It needs a Google Cloud OAuth client, which must be created under your Google account.
 
 1. **Create the project.** https://console.cloud.google.com → New project **Memento**.
