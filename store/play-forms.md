@@ -1,6 +1,6 @@
 # Play Console forms — prepared answers
 
-Draft answers, matching the app as built (v1.0.x) and `docs/privacy.html`. The owner submits them; Google may ask follow-ups.
+**Submitted 2026-09-30** in Play Console (app id 4973828563905598362), matching v1.0.5 and `docs/privacy.html`. Google may ask follow-ups.
 Re-check if cloud backup, sync or shared boards are added later: those change the Data safety answers.
 
 ## App content → Privacy policy
@@ -42,9 +42,12 @@ Re-check if cloud backup, sync or shared boards are added later: those change th
 | Crash logs / Diagnostics | Yes | Yes (Google AdMob) | No | Analytics, Fraud prevention | AdMob |
 | Purchase history | Yes | No (RevenueCat is a service provider) | Only if the user buys | App functionality | RevenueCat + Google Play |
 | Photos and videos | Yes (only if the user turns on Drive backup) | No | **Yes, optional** | App functionality (backup to the user's own Google Drive) | Google Drive API |
+| Other user-generated content (titles, notes in the backup) | Yes (Drive backup only) | No | **Yes, optional** | App functionality | Google Drive API |
 | Email address | Yes (Google sign-in for Drive backup; stored on device only) | No | **Yes, optional** | App functionality, Account management | Google Sign-In |
 
 Photos, videos and notes are otherwise processed only on the device. Drive backups go to the user's own Drive app folder and the developer has no access. Declaring them as collected (optional) is the conservative choice.
+
+Other submitted answers: encrypted in transit Yes; no in-app account creation, no login with outside accounts; deletion URL `https://tmdrudfuf.github.io/Memento/privacy.html#delete`; data is not processed ephemerally. Ad ID declared: used for Analytics, Advertising, Fraud prevention. Government app No; financial features None; health None.
 
 **Not collected:** names, contacts, precise location, messages, other files.
 
