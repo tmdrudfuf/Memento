@@ -24,6 +24,7 @@ REDISCOVER
 • "Remember this?" brings back a memory you haven't opened in a while
 • See what you pinned on this day in past years (Premium)
 • Look back on your year with a yearly recap built from the photos you chose (Premium)
+• A home-screen widget with one memory a day
 • An optional gentle Sunday reminder
 
 PRIVATE BY DESIGN
@@ -33,7 +34,7 @@ PRIVATE BY DESIGN
 
 FREE AND PREMIUM
 Memento is free to use with up to 3 boards and unlimited memories, with a small ad around the collection (never inside a memory).
-Memento Premium adds unlimited boards, no ads, "On this day" and the yearly recap. Monthly or yearly subscription; a Founder's Lifetime option is available for early supporters.
+Memento Premium adds unlimited boards, no ads, "On this day", the yearly recap and automatic weekly backup to your own Google Drive. Monthly or yearly subscription; a Founder's Lifetime option is available for early supporters.
 If Premium ends, every memory stays yours and fully accessible.
 
 Dark mode · English and Korean
