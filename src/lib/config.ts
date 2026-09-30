@@ -14,7 +14,7 @@ export const config = {
     // Google Cloud → APIs & Services → Credentials → OAuth client (Web application) → Client ID.
     // Android also needs an "Android" OAuth client with package com.tmdrudfuf.memento + signing SHA-1s
     // (no value goes here for that one). iOS: set app.json google-signin iosUrlScheme too.
-    webClientId: '',
+    webClientId: '284177643745-r3s3cbcoqlpvhss1jdikthg68184jtru.apps.googleusercontent.com',
   },
   links: {
     site: 'https://tmdrudfuf.github.io/Memento/',
