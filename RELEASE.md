@@ -59,6 +59,17 @@
 | Premium off with 4 jars: all jars open; 5th jar → paywall | ✅ |
 | Weekly reminder: permission asked only on enable; alarm registered for Sunday 19:00 | ✅ |
 
+### Home-screen widget QA (QA release APK, emulator, 2026-09-29)
+
+| Case | Result |
+|---|---|
+| Widget picker: "Memento", 2×2, cork/polaroid preview | ✅ |
+| Added to home: shows the "Remember this?" memory (least recently opened, rotates daily) | ✅ |
+| Tap → opens that memory; Back → Home (not out of the app) | ✅ |
+| Memory opened → next refresh shows a different one; all data deleted → "Pin one photo…" card | ✅ |
+| App going to background (photo picker, share sheet) while a widget exists: no DB errors, Maestro 5/5 | ✅ (fixed: the widget now uses its own SQLite connection) |
+| Tap after the app was *force-stopped* does nothing until the app is opened once | Android rule for stopped apps, not a bug |
+
 ### Standalone release APK (local build, emulator, 2026-09-27)
 
 | Case | Result |

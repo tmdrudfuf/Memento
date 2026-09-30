@@ -195,7 +195,8 @@ const en = {
   done: 'Done',
   // Google Drive backup (Premium)
   paywallBackupTitle: 'Keep your memories safe',
-  paywallBackupBody: 'Back up automatically every week to your own Google Drive, and restore everything on a new phone.',
+  paywallBackupBody:
+    'Back up automatically every week to your own Google Drive, and restore everything on a new phone.',
   benefitBackup: 'Automatic Google Drive backup',
   driveBackup: 'Google Drive backup',
   driveNote: 'Weekly on Wi-Fi, to a private Memento folder in your own Google Drive. Only Memento can read it.',
@@ -217,6 +218,7 @@ const en = {
   driveFailed: 'Google Drive backup didn’t finish',
   driveNotSetUp: 'Google Drive backup isn’t available in this build yet.',
   driveLastFailed: 'The last automatic backup didn’t finish. Try “Back up now”.',
+  widgetEmpty: 'Pin one photo in Memento to see it here.',
 };
 
 type Dict = typeof en;
@@ -416,6 +418,7 @@ const ko: Dict = {
   driveFailed: 'Google Drive 백업을 완료하지 못했어요',
   driveNotSetUp: '이 버전에서는 아직 Google Drive 백업을 사용할 수 없어요.',
   driveLastFailed: '지난 자동 백업이 완료되지 않았어요. “지금 백업”을 눌러 주세요.',
+  widgetEmpty: 'Memento에 사진 한 장을 붙이면 여기에 나타나요.',
 };
 
 // ponytail: language fixed at launch; switching phone language applies on next app start.

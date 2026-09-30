@@ -84,6 +84,25 @@
         {
           "iosUrlScheme": "com.googleusercontent.apps.REPLACE-WITH-IOS-CLIENT-ID"
         }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "Remember",
+              "label": "Memento",
+              "description": "Remember this? One memory from your boards, every day.",
+              "minWidth": "110dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "previewImage": "./assets/widget-preview.png",
+              "updatePeriodMillis": 10800000,
+              "resizeMode": "horizontal|vertical"
+            }
+          ]
+        }
       ]
     ],
     "scheme": "memento",

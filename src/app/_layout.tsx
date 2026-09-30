@@ -7,7 +7,11 @@ import { AutoBackup } from '../lib/autobackup';
 import { migrate } from '../lib/db';
 import { t } from '../lib/i18n';
 import { PremiumProvider } from '../lib/premium';
+import { WidgetRefresher } from '../widget/refresher';
 import { Button, useColors } from '../lib/ui';
+
+// Deep links (widget, notifications) open on top of Home, so Back returns to the boards.
+export const unstable_settings = { initialRouteName: 'index' };
 
 export default function RootLayout() {
   const c = useColors();
@@ -31,6 +35,7 @@ export default function RootLayout() {
           <ThemeProvider value={theme}>
             <StatusBar style="auto" />
             <AutoBackup />
+            <WidgetRefresher />
             <Stack screenOptions={{ headerShadowVisible: false }}>
               <Stack.Screen name="index" options={{ title: 'Memento' }} />
               <Stack.Screen name="jar/[id]" options={{ title: '' }} />

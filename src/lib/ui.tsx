@@ -7,8 +7,7 @@ import { makeStyles, pinColor, useColors } from './theme';
 
 export { useColors } from './theme';
 
-export const formatDate = (ms: number) =>
-  new Date(ms).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+export { formatDate } from './format';
 
 // Deterministic tilt per id so the collection looks hand-placed but stable.
 export const tilt = (id: number, max = 2.5) => `${(((id * 37) % 11) / 10 - 0.5) * 2 * max}deg`;
