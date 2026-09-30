@@ -43,7 +43,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test \"test/*.test.ts\"",
     "check": "npm run typecheck && npm run lint && npm test",
-    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" plugins/*.js"
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"test/**/*.ts\" plugins/*.js",
+    "e2e": "maestro test .maestro/"
   },
   "private": true
 }

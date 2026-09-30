@@ -1,0 +1,25 @@
+# Free plan: 3 boards; the 4th opens the paywall; existing boards stay open.
+appId: com.tmdrudfuf.memento
+name: Fourth board opens the paywall
+---
+- runFlow: common/fresh-with-board.yaml
+- tapOn: "New board"
+- tapOn: "e.g. Japan 2026, Us, Cooking"
+- inputText: "Second"
+- pressKey: Enter
+- back
+- tapOn: "New board"
+- tapOn: "e.g. Japan 2026, Us, Cooking"
+- inputText: "Third"
+- pressKey: Enter
+- back
+- scrollUntilVisible:
+    element: "New board"
+- tapOn: "New board"
+- assertVisible: "Your memories are growing."
+- assertVisible: "Purchases aren’t available in this build yet."
+- scrollUntilVisible:
+    element: "Not now"
+- tapOn: "Not now"
+- tapOn: "Second, 0 memories.*"
+- assertVisible: "Nothing on this board yet"

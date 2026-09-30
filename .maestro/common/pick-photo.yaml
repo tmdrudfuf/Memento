@@ -1,0 +1,9 @@
+# Picks a photo in Android's system photo picker (works for the half and full sheet layouts).
+appId: com.tmdrudfuf.memento
+---
+- extendedWaitUntil:
+    visible: "Photo taken on.*"
+    timeout: 10000
+- tapOn:
+    text: "Photo taken on.*"
+    index: 0

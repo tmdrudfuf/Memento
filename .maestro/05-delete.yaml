@@ -1,0 +1,15 @@
+# Deleting a memory and then its board leaves an empty shelf.
+appId: com.tmdrudfuf.memento
+name: Delete memory and board
+---
+- runFlow: common/fresh-with-board.yaml
+- tapOn: "Test Trip, 1 memory.*"
+- tapOn: "Open memory.*"
+- tapOn: "Memory options"
+- tapOn: "Delete memory"
+- tapOn: "DELETE"
+- assertVisible: "Nothing on this board yet"
+- tapOn: "Board options"
+- tapOn: "Delete board"
+- tapOn: "DELETE"
+- assertVisible: "Your shelf is empty"

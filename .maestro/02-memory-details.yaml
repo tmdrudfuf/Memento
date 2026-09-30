@@ -1,0 +1,44 @@
+# Title + note save as you type, related photos are added, everything survives a restart,
+# and the viewer swipes through cover + items.
+appId: com.tmdrudfuf.memento
+name: Memory details persist and viewer swipes
+---
+- runFlow: common/fresh-with-board.yaml
+- tapOn: "Test Trip, 1 memory.*"
+- tapOn: "Open memory.*"
+- tapOn: "Add a title"
+- inputText: "Ramen Night"
+- hideKeyboard # the note field sits behind the keyboard after typing the title
+- scrollUntilVisible:
+    element: "A line to remember it by.*"
+- tapOn: "A line to remember it by.*"
+- inputText: "no English menu"
+- hideKeyboard
+- scrollUntilVisible:
+    element: '(?s).*Photos.*videos'
+- tapOn: '(?s).*Photos.*videos'
+- extendedWaitUntil:
+    visible: "Photo taken on.*"
+    timeout: 10000
+- tapOn:
+    text: "Photo taken on.*"
+    index: 1
+- tapOn:
+    text: "Photo taken on.*"
+    index: 2
+- tapOn: 'Add \(2\)'
+- extendedWaitUntil:
+    visible: "photo, long press for options"
+    timeout: 10000
+- stopApp
+- launchApp
+- tapOn: "Test Trip, 1 memory.*"
+- tapOn: "Open memory Ramen Night"
+- assertVisible: "Ramen Night"
+- assertVisible: "no English menu"
+- tapOn: "View cover photo"
+- assertVisible: "1 / 3"
+- swipe:
+    direction: LEFT
+- assertVisible: "2 / 3"
+- tapOn: "Close"

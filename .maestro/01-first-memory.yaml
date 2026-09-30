@@ -1,0 +1,18 @@
+# Fresh install: welcome → pick one photo → name the first board → it's on the shelf.
+# Needs photos in the emulator gallery (the picker shows the most recent first).
+appId: com.tmdrudfuf.memento
+name: First memory in 3 taps
+---
+- clearState
+- launchApp
+- tapOn: "Start collecting"
+- assertVisible: "Your shelf is empty"
+- tapOn: ".*Add a memory"
+- runFlow: common/pick-photo.yaml
+- assertVisible: "Name your first board"
+- tapOn: "e.g. Japan 2026, Us, Cooking" # focus the field first; typing too early drops characters
+- inputText: "Test Trip"
+- pressKey: Enter
+- assertVisible: "Test Trip" # board screen title after saving
+- back
+- assertVisible: "Test Trip, 1 memory.*"

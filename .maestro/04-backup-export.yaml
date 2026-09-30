@@ -1,0 +1,13 @@
+# Settings → Export backup builds a zip and hands it to the share sheet.
+appId: com.tmdrudfuf.memento
+name: Backup export reaches the share sheet
+---
+- runFlow: common/fresh-with-board.yaml
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Export backup"
+- tapOn: "Export backup"
+- extendedWaitUntil:
+    visible: 'Memento-backup-.*\.zip'
+    timeout: 30000
+- back

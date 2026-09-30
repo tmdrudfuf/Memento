@@ -1,0 +1,13 @@
+# Clean install with one board ("Test Trip") holding one memory; ends on Home.
+appId: com.tmdrudfuf.memento
+---
+- clearState
+- launchApp
+- tapOn: "Start collecting"
+- tapOn: ".*Add a memory"
+- runFlow: pick-photo.yaml
+- tapOn: "e.g. Japan 2026, Us, Cooking"
+- inputText: "Test Trip"
+- pressKey: Enter
+- assertVisible: "Test Trip"
+- back

@@ -11,12 +11,20 @@ const inExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreCl
 // eslint-disable-next-line @typescript-eslint/no-require-imports -- must not load in Expo Go
 const load = (): AdsModule | null => (inExpoGo ? null : require('react-native-google-mobile-ads'));
 
-type AdsState = { ready: boolean; privacyOptionsRequired: boolean; showPrivacyOptions: () => void };
-const Ctx = createContext<AdsState>({ ready: false, privacyOptionsRequired: false, showPrivacyOptions: () => {} });
+// 'pending' until consent/initialization resolves, then 'ready' or 'off' (no ads allowed/available).
+type AdsStatus = 'pending' | 'ready' | 'off';
+type AdsState = { status: AdsStatus; ready: boolean; privacyOptionsRequired: boolean; showPrivacyOptions: () => void };
+const Ctx = createContext<AdsState>({
+  status: 'off',
+  ready: false,
+  privacyOptionsRequired: false,
+  showPrivacyOptions: () => {},
+});
 
 export function AdsProvider({ children }: { children: ReactNode }) {
   const { isPremium } = usePremium();
-  const [ready, setReady] = useState(false);
+  const [status, setStatus] = useState<AdsStatus>(load() ? 'pending' : 'off');
+  const ready = status === 'ready';
   const [privacyOptionsRequired, setPrivacyOptionsRequired] = useState(false);
 
   useEffect(() => {
@@ -27,11 +35,12 @@ export function AdsProvider({ children }: { children: ReactNode }) {
         // EU/UK consent (Google UMP) must be gathered before any ad request.
         const info = await ads.AdsConsent.gatherConsent();
         setPrivacyOptionsRequired(info.privacyOptionsRequirementStatus === 'REQUIRED');
-        if (!info.canRequestAds) return;
+        if (!info.canRequestAds) return setStatus('off');
         await ads.default().initialize();
-        setReady(true);
+        setStatus('ready');
       } catch (e) {
         console.warn('Ads unavailable', e); // no ads is always an acceptable outcome
+        setStatus('off');
       }
     })();
   }, [isPremium, ready]);
@@ -42,30 +51,36 @@ export function AdsProvider({ children }: { children: ReactNode }) {
       .catch((e) => console.warn(e));
   };
 
-  return <Ctx.Provider value={{ ready, privacyOptionsRequired, showPrivacyOptions }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ status, ready, privacyOptionsRequired, showPrivacyOptions }}>{children}</Ctx.Provider>;
 }
 
 export const useAds = () => useContext(Ctx);
 
-/** Bottom adaptive banner. Renders nothing for Premium users or before consent/initialization. */
+/**
+ * Bottom adaptive banner. Its space is reserved while ads are pending or loaded, so the capture
+ * buttons above never jump when an ad arrives (a jump right before a tap causes accidental taps).
+ * Renders nothing for Premium users, in Expo Go, or when ads are off (e.g. consent not given).
+ */
 export function AdBanner() {
   const { isPremium } = usePremium();
-  const { ready } = useAds();
+  const { status } = useAds();
   const ads = load();
-  if (!ads || isPremium || !ready) return null;
+  if (!ads || isPremium || status === 'off') return null;
   const real = Platform.OS === 'ios' ? config.admob.iosBanner : config.admob.androidBanner;
   const unitId = __DEV__ || !real ? ads.TestIds.ADAPTIVE_BANNER : real;
   const { BannerAd, BannerAdSize } = ads;
   return (
-    // Gap above keeps the ad clear of the capture buttons (avoids accidental taps).
-    <View style={{ alignItems: 'center', paddingTop: 6 }}>
-      <BannerAd
-        unitId={unitId}
-        // ponytail: ANCHORED_ADAPTIVE_BANNER is deprecated in favor of LARGE_; kept for the smaller footprint.
-        size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
-        requestOptions={{ requestNonPersonalizedAdsOnly: true }}
-        onAdFailedToLoad={(e) => console.warn('Ad failed', e.message)}
-      />
+    // Gap above keeps the ad clear of the capture buttons.
+    <View style={{ alignItems: 'center', paddingTop: 6, minHeight: 56 }}>
+      {status === 'ready' && (
+        <BannerAd
+          unitId={unitId}
+          // ponytail: ANCHORED_ADAPTIVE_BANNER is deprecated in favor of LARGE_; kept for the smaller footprint.
+          size={BannerAdSize.ANCHORED_ADAPTIVE_BANNER}
+          requestOptions={{ requestNonPersonalizedAdsOnly: true }}
+          onAdFailedToLoad={(e) => console.warn('Ad failed', e.message)}
+        />
+      )}
     </View>
   );
 }
