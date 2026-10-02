@@ -117,10 +117,10 @@ Blocked items need the owner (masterplan §26).
 Code is done and verified with Google test ads plus a QA Premium switch. Real money needs these, in order:
 
 1. **Google Play Console** ($25): create app `com.tmdrudfuf.memento`, set up a payments profile, upload `memento-*.aab` to Internal testing (Play requires an uploaded build before in-app products can be created).
-2. **Play products:**
+2. **Play products** — **done 2026-10-02** (monthly $3.99 → KRW 5,900; yearly $29.99 → KRW 44,000; lifetime $59.99, purchase option `lifetime`):
    - Subscription `premium` with base plans `monthly` ($3.99) and `yearly` ($29.99).
    - One-time product `founders_lifetime` ($59.99).
-3. **RevenueCat** (free):
+3. **RevenueCat** (free) — **done 2026-10-02 except the service-account JSON**: project `b8941d55`, Play app, products `premium:monthly` (backwards compatible), `premium:yearly`, `founders_lifetime`, entitlement `premium`, offering `default` ($rc_monthly/$rc_annual/$rc_lifetime), public key in config.ts:
    - Create a project, add the Play app, and link a Google service-account JSON.
    - Create entitlement `premium` and attach all 3 products.
    - Create offering `default` with packages Monthly, Annual and Lifetime.

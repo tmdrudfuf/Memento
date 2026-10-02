@@ -2,7 +2,7 @@
 // Empty values = not set up yet: purchases show as unavailable, ads use Google's test units.
 export const config = {
   revenueCat: {
-    androidKey: '', // RevenueCat → Project → API keys → Google Play public SDK key (goog_...)
+    androidKey: 'goog_boSEZanwUpyvBhrgHHIePSKCTYL', // RevenueCat → Project → API keys → Google Play public SDK key (goog_...)
     iosKey: '', // RevenueCat → Project → API keys → App Store public SDK key (appl_...)
     entitlement: 'premium', // one entitlement unlocked by monthly, yearly and Founder's Lifetime
   },
