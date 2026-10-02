@@ -21,5 +21,6 @@ export const config = {
     privacy: 'https://tmdrudfuf.github.io/Memento/privacy.html',
     terms: 'https://tmdrudfuf.github.io/Memento/terms.html',
     support: 'https://github.com/tmdrudfuf/Memento/issues',
+    feedback: 'tmdrudfuf@gmail.com',
   },
 };

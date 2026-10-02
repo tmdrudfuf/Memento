@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   Modal,
   Pressable,
   ScrollView,
@@ -33,7 +34,18 @@ import { disableWeeklyReminder, enableWeeklyReminder } from '../lib/reminder';
 import { makeStyles, useChrome } from '../lib/theme';
 import { formatDate, useColors } from '../lib/ui';
 
-const { site: SITE, privacy: PRIVACY, support: SUPPORT } = config.links;
+const { site: SITE, privacy: PRIVACY, support: SUPPORT, feedback: FEEDBACK } = config.links;
+
+// Email with the version and device prefilled, so tester reports are actionable.
+function sendFeedback() {
+  const v = Constants.expoConfig?.version ?? '?';
+  const subject = encodeURIComponent(`Memento feedback (v${v})`);
+  const body = encodeURIComponent(`
+
+—
+Memento ${v} · ${Platform.OS} ${Platform.Version}`);
+  Linking.openURL(`mailto:${FEEDBACK}?subject=${subject}&body=${body}`).catch(() => Linking.openURL(SUPPORT));
+}
 
 const formatBytes = (b: number) => {
   const mb = b / 1024 / 1024;
@@ -316,6 +328,7 @@ export default function Settings() {
       </Section>
 
       <Section title={t.about}>
+        <Row label={t.sendFeedback} onPress={sendFeedback} />
         <Row label={t.support} onPress={() => Linking.openURL(SUPPORT)} />
         <Row label={t.website} onPress={() => Linking.openURL(SITE)} />
         <Row label={t.version} value={Constants.expoConfig?.version ?? '—'} last />
