@@ -181,3 +181,17 @@ The code is done: sign-in, resumable upload to the `drive.appdata` folder, weekl
 - **App Privacy (iOS) / Data safety (Play):** *Data Not Collected*. No data shared, no data collected, no encryption-in-transit questions apply (no network use).
 - **Content rating:** Everyone / 4+. No user-generated content is shared, no ads.
 - **Screenshots needed:** Home shelf, capture sheet (jar chips), a jar of polaroids, a memory with note + items. Take them from a device with real photos.
+
+## Closed test plan (14 days, ~2026-09-30 → 10-13)
+
+Google asks at production-access time what changed based on testing, so each update records what it fixed.
+
+| Update | Date | Version | Scope |
+|---|---|---|---|
+| 1 | 10-04 | v1.0.6 | Pre-launch report / vitals fixes, Korean widget description, Drive sign-in for testers (publish consent screen), easier feedback |
+| 2 | 10-09 | v1.0.7 | Tester feedback, Play products + RevenueCat verified with license testers, polish |
+| Buffer | 10-10..13 | | hotfixes |
+| Apply | ~10-14 | | production access questionnaire (draft answers from the change log below) |
+
+### Change log for the production questionnaire
+- v1.0.5 (closed test start): first Play build, real AdMob + Google sign-in IDs.
