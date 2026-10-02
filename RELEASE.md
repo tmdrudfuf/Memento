@@ -195,4 +195,4 @@ Google asks at production-access time what changed based on testing, so each upd
 
 ### Change log for the production questionnaire
 - v1.0.5 (closed test start): first Play build, real AdMob + Google sign-in IDs.
-- v1.0.6: in-app "Send feedback" (email with version/device prefilled; testers had only a GitHub link), Korean widget picker text, correct version name (Play showed 1.0.0).
+- v1.0.6 (submitted to closed test 2026-10-02; closed test countries also widened KR → KR+US+CA): in-app "Send feedback" (email with version/device prefilled; testers had only a GitHub link), Korean widget picker text, correct version name (Play showed 1.0.0).
