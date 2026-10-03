@@ -139,7 +139,7 @@ QA builds: `EXPO_PUBLIC_QA=1` before the Gradle build shows a "Premium (debug bu
 
 ## Google Drive backup setup (owner, free, ~10 min)
 
-**Status (2026-09-29): steps 1–5 done** in Cloud project `memento-510208` (Testing mode, test user tmdrudfuf@gmail.com). Play App Signing client added 2026-10-01 (SHA-1 `B1:C1:C2:FE:91:A0:FB:D6:CB:4D:ED:16:39:BD:BD:34:F0:F5:35:51`). Remaining: publish the consent screen (Audience → Publish app) so users beyond the test-user list can sign in.
+**Status (2026-09-29): steps 1–5 done** in Cloud project `memento-510208` (Testing mode, test user tmdrudfuf@gmail.com). Play App Signing client added 2026-10-01 (SHA-1 `B1:C1:C2:FE:91:A0:FB:D6:CB:4D:ED:16:39:BD:BD:34:F0:F5:35:51`). Consent screen published to production 2026-10-03 (branding: home/privacy/terms on tmdrudfuf.github.io, authorized domain tmdrudfuf.github.io, no logo so no verification).
 
 The code is done: sign-in, resumable upload to the `drive.appdata` folder, weekly Wi-Fi auto backup, restore, and disconnect-and-delete. It needs a Google Cloud OAuth client, which must be created under your Google account.
 
