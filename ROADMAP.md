@@ -111,7 +111,7 @@ These two features cannot work with "everything on the phone". They need a cloud
 | 4 | Phase 2 paywall, 3-jar limit, ads code | Code ✅ | Play Console ($25), AdMob + RevenueCat accounts (free) |
 | 5 | Phase 3 Google sign-in + Drive backup | Mostly | Create a free Google Cloud OAuth client (I guide you, ~5 min) |
 | 6 | Phase 5 smart organization | ✅ | — |
-| 7 | Phase 6 sync + shared jars | Code ✅ | **Approval of server costs** |
+| 7 | Phase 6 sync + shared jars | Not started (design only) | **Approval of server costs** |
 | 8 | Phase 8 launch | Partly | 12 testers; Apple $99/yr for iPhone |
 
 Every step is tested on the emulator, committed, and published as a new downloadable APK.
