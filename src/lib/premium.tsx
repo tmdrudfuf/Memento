@@ -10,6 +10,8 @@ type Premium = {
   /** True once the store is configured and offerings loaded (false in builds without store keys). */
   storeReady: boolean;
   offering: PurchasesOffering | null;
+  /** Store page to manage or cancel an active subscription (null for Lifetime or Free). */
+  manageUrl: string | null;
   purchase: (pkg: PurchasesPackage) => Promise<boolean>;
   restore: () => Promise<boolean>;
   /** QA only: flip Premium without a store, to test gated screens. */
@@ -28,6 +30,12 @@ const entitled = (info: CustomerInfo) => info.entitlements.active[config.revenue
 export function PremiumProvider({ children }: { children: ReactNode }) {
   const db = useSQLiteContext();
   const [storePremium, setStorePremium] = useState(false);
+  const [manageUrl, setManageUrl] = useState<string | null>(null);
+  const apply = useCallback((info: CustomerInfo) => {
+    setStorePremium(entitled(info));
+    setManageUrl(info.managementURL);
+    return entitled(info);
+  }, []);
   const [offering, setOffering] = useState<PurchasesOffering | null>(null);
   const [storeReady, setStoreReady] = useState(false);
   const [devOverride, setDev] = useState(false);
@@ -39,7 +47,7 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!apiKey) return; // not set up yet: everyone is Free, paywall explains purchases aren't available
     let alive = true;
-    const onInfo = (info: CustomerInfo) => alive && setStorePremium(entitled(info));
+    const onInfo = (info: CustomerInfo) => alive && apply(info);
     (async () => {
       try {
         Purchases.configure({ apiKey });
@@ -58,24 +66,19 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
       alive = false;
       Purchases.removeCustomerInfoUpdateListener(onInfo);
     };
-  }, []);
+  }, [apply]);
 
   const purchase = useCallback(async (pkg: PurchasesPackage) => {
     try {
       const { customerInfo } = await Purchases.purchasePackage(pkg);
-      setStorePremium(entitled(customerInfo));
-      return entitled(customerInfo);
+      return apply(customerInfo);
     } catch (e) {
       if ((e as { userCancelled?: boolean }).userCancelled) return false;
       throw e;
     }
-  }, []);
+  }, [apply]);
 
-  const restore = useCallback(async () => {
-    const info = await Purchases.restorePurchases();
-    setStorePremium(entitled(info));
-    return entitled(info);
-  }, []);
+  const restore = useCallback(async () => apply(await Purchases.restorePurchases()), [apply]);
 
   const setDevOverride = useCallback(
     (on: boolean) => {
@@ -90,12 +93,13 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
       isPremium: storePremium || (QA && devOverride),
       storeReady,
       offering,
+      manageUrl,
       purchase,
       restore,
       devOverride,
       setDevOverride,
     }),
-    [storePremium, devOverride, storeReady, offering, purchase, restore, setDevOverride],
+    [storePremium, devOverride, storeReady, offering, manageUrl, purchase, restore, setDevOverride],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

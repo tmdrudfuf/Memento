@@ -85,7 +85,6 @@ export default function Paywall() {
             ✓ {b}
           </Text>
         ))}
-        <Text style={styles.soon}>{t.comingSoon}</Text>
       </View>
 
       <View style={{ gap: 10 }}>
@@ -150,7 +149,6 @@ const useStyles = makeStyles((c) => ({
   body: { fontSize: 16, color: c.muted, lineHeight: 22 },
   benefits: { gap: 8, backgroundColor: c.card, borderRadius: 14, padding: 16 },
   benefit: { fontSize: 16, color: c.ink },
-  soon: { fontSize: 13, color: c.muted, marginTop: 4 },
   plan: {
     flexDirection: 'row',
     alignItems: 'center',
