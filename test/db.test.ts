@@ -290,3 +290,29 @@ test('v2 database migrates to v3 (position column) keeping data', async () => {
   await q.createJar(db, 'New');
   assert.equal((await q.listJars(db, 'custom')).length, 2);
 });
+
+test('two connections migrating at once (app + widget) do not collide', async () => {
+  const { mkdtempSync } = await import('node:fs');
+  const { join } = await import('node:path');
+  const { tmpdir } = await import('node:os');
+  const file = join(mkdtempSync(join(tmpdir(), 'memento-')), 'memento.db');
+  const conn = (stale: boolean): q.DB => {
+    const s = new DatabaseSync(file);
+    let first = stale;
+    return {
+      execAsync: async (sql: string) => void s.exec(sql),
+      // A stale first read reproduces the race: this connection checked before the other committed.
+      getFirstAsync: async (sql: string) => {
+        if (first && sql.includes('user_version')) {
+          first = false;
+          return { user_version: 0 };
+        }
+        return s.prepare(sql).get() ?? null;
+      },
+    } as unknown as q.DB;
+  };
+  await q.migrate(conn(false)); // the widget finished first
+  await assert.doesNotReject(q.migrate(conn(true))); // the app saw version 0 a moment earlier
+  const db = conn(false);
+  assert.equal((await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version'))?.user_version, 3);
+});

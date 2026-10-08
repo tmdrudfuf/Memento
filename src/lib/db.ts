@@ -26,12 +26,26 @@ export async function migrate(db: DB) {
   // Per-connection settings only. busy_timeout: when Android recreates the activity (font size,
   // theme, memory pressure) a new connection may open while the old one still holds a lock.
   await db.execAsync('PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
-  const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-  let v = row?.user_version ?? 0;
-  if (v >= VERSION) return;
+  const version = async () =>
+    (await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version'))?.user_version ?? 0;
+  if ((await version()) >= VERSION) return;
+  // WAL is stored in the database file and can't change inside a transaction; it's only set when a
+  // migration is due, not on every open (it needs a lock).
+  await db.execAsync('PRAGMA journal_mode = WAL;');
+  // The home-screen widget opens its own connection and may migrate at the same moment (e.g. right
+  // after data was cleared). Take the write lock, then re-read: whoever is second sees the new version.
+  await db.execAsync('BEGIN IMMEDIATE;');
+  try {
+    await steps(db, await version());
+    await db.execAsync(`PRAGMA user_version = ${VERSION}; COMMIT;`);
+  } catch (e) {
+    await db.execAsync('ROLLBACK;').catch(() => {});
+    throw e;
+  }
+}
+
+async function steps(db: DB, v: number) {
   if (v === 0) {
-    // WAL is stored in the database file, so it's set once here rather than on every open (it needs a lock).
-    await db.execAsync('PRAGMA journal_mode = WAL;');
     await db.execAsync(`
       CREATE TABLE jars (
         id INTEGER PRIMARY KEY NOT NULL,
@@ -73,7 +87,6 @@ export async function migrate(db: DB) {
     await db.execAsync('ALTER TABLE jars ADD COLUMN position INTEGER;');
     v = 3;
   }
-  await db.execAsync(`PRAGMA user_version = ${VERSION}`);
 }
 
 export type JarOrder = 'recent' | 'custom';
