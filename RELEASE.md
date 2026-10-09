@@ -190,7 +190,7 @@ Google asks at production-access time what changed based on testing, so each upd
 |---|---|---|---|
 | 1 | 10-02 | v1.0.6 | Pre-launch report / vitals fixes, Korean widget description, Drive sign-in for testers (publish consent screen), easier feedback |
 | 2 | 10-08 | v1.0.7 | Tester feedback, Play products + RevenueCat verified with license testers, polish |
-| 3 | 10-10 | v1.0.8 | Fixes from the owner's real-purchase test on 1.0.7; TalkBack labels on icon-only buttons; haptics on save/delete/reorder |
+| 3 | 10-10 | v1.0.8 | Fixes from the owner's real-purchase test on 1.0.7; haptics on 8 actions (save, move, set cover, delete memory/item/board/all, reorder, purchase); TalkBack button roles on memory cover and tiles, name-dialog backdrop hidden from TalkBack (888ade3) |
 | 4 | 10-12 | v1.0.9 | App lock (fingerprint/face, phone PIN fallback), Premium, off by default (Roadmap phase 7) |
 | Apply | ~10-14 | | production access questionnaire (draft answers from the change log below) |
 
