@@ -256,9 +256,7 @@ export default function Settings() {
             onPress={() => router.push({ pathname: '/paywall', params: { reason: 'settings' } })}
           />
         )}
-        {premium.manageUrl && (
-          <Row label={t.manageSubscription} onPress={() => Linking.openURL(premium.manageUrl!)} />
-        )}
+        {premium.manageUrl && <Row label={t.manageSubscription} onPress={() => Linking.openURL(premium.manageUrl!)} />}
         {premium.storeReady && (
           <Row
             label={t.restore}

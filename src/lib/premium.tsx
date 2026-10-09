@@ -68,15 +68,18 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
     };
   }, [apply]);
 
-  const purchase = useCallback(async (pkg: PurchasesPackage) => {
-    try {
-      const { customerInfo } = await Purchases.purchasePackage(pkg);
-      return apply(customerInfo);
-    } catch (e) {
-      if ((e as { userCancelled?: boolean }).userCancelled) return false;
-      throw e;
-    }
-  }, [apply]);
+  const purchase = useCallback(
+    async (pkg: PurchasesPackage) => {
+      try {
+        const { customerInfo } = await Purchases.purchasePackage(pkg);
+        return apply(customerInfo);
+      } catch (e) {
+        if ((e as { userCancelled?: boolean }).userCancelled) return false;
+        throw e;
+      }
+    },
+    [apply],
+  );
 
   const restore = useCallback(async () => apply(await Purchases.restorePurchases()), [apply]);
 
