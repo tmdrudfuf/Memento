@@ -9,7 +9,7 @@ import { AdBanner } from '../../lib/ads';
 import { t } from '../../lib/i18n';
 import { removeFiles, startCapture } from '../../lib/media';
 import { NameDialog, Sheet } from '../../lib/sheet';
-import { BoardSurface, CaptureBar, Empty, formatDate, Polaroid, useColors } from '../../lib/ui';
+import { BoardSurface, CaptureBar, Empty, formatDate, haptic, Polaroid, useColors } from '../../lib/ui';
 
 export default function Jar() {
   const db = useSQLiteContext();
@@ -49,6 +49,7 @@ export default function Jar() {
         style: 'destructive',
         onPress: async () => {
           removeFiles(await deleteJar(db, id));
+          haptic.warn();
           router.back();
         },
       },

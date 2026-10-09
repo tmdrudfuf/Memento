@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import { useEffect, useState, type ReactNode } from 'react';
 import { Animated, ImageBackground, Pressable, Text, View, type ImageStyle, type ViewStyle } from 'react-native';
@@ -8,6 +9,13 @@ import { makeStyles, pinColor, useColors } from './theme';
 export { useColors } from './theme';
 
 export { formatDate } from './format';
+
+// Feedback for actions that change the collection. Silent on phones without a vibrator.
+export const haptic = {
+  done: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}),
+  warn: () => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {}),
+  tick: () => Haptics.selectionAsync().catch(() => {}),
+};
 
 // Deterministic tilt per id so the collection looks hand-placed but stable.
 export const tilt = (id: number, max = 2.5) => `${(((id * 37) % 11) / 10 - 0.5) * 2 * max}deg`;

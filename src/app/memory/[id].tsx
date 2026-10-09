@@ -22,7 +22,7 @@ import { t } from '../../lib/i18n';
 import { pickFromLibrary, removeFiles, saveFailed, shareFile, takeWithCamera } from '../../lib/media';
 import { Sheet } from '../../lib/sheet';
 import { makeStyles, useChrome } from '../../lib/theme';
-import { formatDate, Photo, useColors } from '../../lib/ui';
+import { formatDate, haptic, Photo, useColors } from '../../lib/ui';
 
 export default function Memory() {
   const db = useSQLiteContext();
@@ -91,6 +91,7 @@ export default function Memory() {
         style: 'destructive',
         onPress: async () => {
           const f = await deleteMedia(db, item.id);
+          haptic.warn();
           if (f) removeFiles([f]);
           load();
         },
@@ -110,12 +111,14 @@ export default function Memory() {
 
   async function move(jar: JarSummary) {
     await moveMemory(db, id, jar.id);
+    haptic.done();
     router.dismissTo({ pathname: '/jar/[id]', params: { id: String(jar.id) } });
   }
 
   async function makeCover(item: Media) {
     try {
       await setCover(db, id, item.id);
+      haptic.done();
       load();
     } catch (e) {
       saveFailed(e);
@@ -130,6 +133,7 @@ export default function Memory() {
         style: 'destructive',
         onPress: async () => {
           removeFiles(await deleteMemory(db, id));
+          haptic.warn();
           router.back();
         },
       },
@@ -161,7 +165,7 @@ export default function Memory() {
         }}
       />
       <ScrollView contentContainerStyle={{ paddingBottom: 48 }} keyboardShouldPersistTaps="handled">
-        <Pressable onPress={() => view(0)} accessibilityLabel={t.viewCover}>
+        <Pressable onPress={() => view(0)} accessibilityRole="button" accessibilityLabel={t.viewCover}>
           <Photo file={m.cover} style={{ width: '100%', aspectRatio: 1 }} />
         </Pressable>
 
@@ -219,6 +223,7 @@ export default function Memory() {
                 style={styles.tile}
                 onPress={() => view(i + 1)}
                 onLongPress={() => setItemMenu(it)}
+                accessibilityRole="button"
                 accessibilityLabel={t.itemA11y(it.kind)}
               >
                 {it.kind === 'photo' ? (

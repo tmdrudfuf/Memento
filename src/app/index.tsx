@@ -29,7 +29,7 @@ import {
 } from '../lib/rediscover';
 import { NameDialog, Sheet } from '../lib/sheet';
 import { makeStyles, useChrome } from '../lib/theme';
-import { BoardThumb, CaptureBar, Empty, formatDate, Photo, Pin } from '../lib/ui';
+import { BoardThumb, CaptureBar, Empty, formatDate, haptic, Photo, Pin } from '../lib/ui';
 
 const NEW = -1; // sentinel item for the "New jar" tile
 
@@ -82,6 +82,7 @@ export default function Home() {
         style: 'destructive',
         onPress: async () => {
           removeFiles(await deleteJar(db, jar.id));
+          haptic.warn();
           load();
         },
       },

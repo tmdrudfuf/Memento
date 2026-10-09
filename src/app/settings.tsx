@@ -32,7 +32,7 @@ import { t } from '../lib/i18n';
 import { QA, usePremium } from '../lib/premium';
 import { disableWeeklyReminder, enableWeeklyReminder } from '../lib/reminder';
 import { makeStyles, useChrome } from '../lib/theme';
-import { formatDate, useColors } from '../lib/ui';
+import { formatDate, haptic, useColors } from '../lib/ui';
 
 const { site: SITE, privacy: PRIVACY, support: SUPPORT, feedback: FEEDBACK } = config.links;
 
@@ -229,6 +229,7 @@ export default function Settings() {
               onPress: async () => {
                 await deleteAllData(db);
                 removeAllMedia();
+                haptic.warn();
                 router.dismissAll();
               },
             },

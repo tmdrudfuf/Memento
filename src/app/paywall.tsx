@@ -7,7 +7,7 @@ import { t } from '../lib/i18n';
 import type { PaywallReason } from '../lib/plan';
 import { usePremium } from '../lib/premium';
 import { makeStyles, useChrome } from '../lib/theme';
-import { Button, useColors } from '../lib/ui';
+import { Button, haptic, useColors } from '../lib/ui';
 
 // Shown only at the moment a Premium feature is needed (MONETIZATION.md §6). Never at launch.
 const COPY: Record<PaywallReason, { title: string; body: string }> = {
@@ -46,6 +46,7 @@ export default function Paywall() {
     setBusy(true);
     try {
       if (await purchase(p)) {
+        haptic.done();
         Alert.alert(t.welcomePremium);
         router.back();
       }

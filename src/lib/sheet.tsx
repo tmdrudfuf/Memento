@@ -79,7 +79,7 @@ function DialogBody({ title, initial = '', placeholder, confirmLabel = t.save, o
   };
   return (
     <KeyboardAvoidingView style={styles.center} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+      <Pressable style={StyleSheet.absoluteFill} onPress={onClose} importantForAccessibility="no" />
       <View style={styles.dialog}>
         <Text style={styles.dialogTitle}>{title}</Text>
         <TextInput

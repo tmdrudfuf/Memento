@@ -5,7 +5,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { getSetting, listJars, setJarOrder, setSetting, type JarOrder, type JarSummary } from '../lib/db';
 import { t } from '../lib/i18n';
 import { makeStyles, useChrome } from '../lib/theme';
-import { BoardThumb } from '../lib/ui';
+import { BoardThumb, haptic } from '../lib/ui';
 
 // Manual board order with ▲▼ (no drag library needed). Saving switches Home to this order.
 export default function Arrange() {
@@ -18,12 +18,14 @@ export default function Arrange() {
     getSetting(db, 'boardOrder').then((o) => listJars(db, (o as JarOrder) ?? 'recent').then(setJars));
   }, [db]);
 
-  const move = (i: number, d: -1 | 1) =>
+  const move = (i: number, d: -1 | 1) => {
+    haptic.tick();
     setJars((js) => {
       const next = [...js];
       [next[i], next[i + d]] = [next[i + d], next[i]];
       return next;
     });
+  };
 
   async function save() {
     await setJarOrder(
@@ -31,6 +33,7 @@ export default function Arrange() {
       jars.map((j) => j.id),
     );
     await setSetting(db, 'boardOrder', 'custom');
+    haptic.done();
     router.back();
   }
 

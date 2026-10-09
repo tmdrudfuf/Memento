@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams, useNavigation } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useRef, useState } from 'react';
@@ -9,7 +8,7 @@ import { removeFiles, saveFailed } from '../lib/media';
 import { canCreateJar } from '../lib/plan';
 import { usePremium } from '../lib/premium';
 import { makeStyles, useChrome } from '../lib/theme';
-import { Photo, Pin, useColors } from '../lib/ui';
+import { haptic, Photo, Pin, useColors } from '../lib/ui';
 
 // Photo → choose Jar → Done. Tapping a jar IS the save; nothing else is asked.
 export default function Capture() {
@@ -48,7 +47,7 @@ export default function Capture() {
     saved.current = true;
     try {
       const id = await createMemory(db, { jarId, cover: p.file, memoryDate: Number(p.date) || null });
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      haptic.done();
       router.dismissTo({ pathname: '/jar/[id]', params: { id: String(jarId), settle: String(id) } });
     } catch (e) {
       saved.current = false;
